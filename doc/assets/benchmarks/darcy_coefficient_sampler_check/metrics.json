@@ -1,0 +1,43 @@
+{
+  "problem": "darcy_coefficient_sampler_check",
+  "description": "Statistics of Li et al.'s released training coefficients vs the fixed extra-coefficient pool of darcy_physics/_ritz.py (native 421 grid, no solutions).",
+  "n_fields": 1000,
+  "results": {
+    "released_smooth1": {
+      "values": [
+        3.0,
+        12.0
+      ],
+      "high_area_fraction_mean": 0.4998597204685211,
+      "high_area_fraction_std": 0.05660112947225571,
+      "interface_density_mean": 0.0057072701051917194,
+      "interface_density_std": 0.0021806237603805155,
+      "autocorrelation_by_lag_nodes": {
+        "1": 0.9883694052696228,
+        "5": 0.9495156407356262,
+        "10": 0.9069422483444214,
+        "20": 0.8305143117904663,
+        "40": 0.6954591274261475,
+        "80": 0.4629085659980774
+      }
+    },
+    "sampled_pool": {
+      "values": [
+        3.0,
+        12.0
+      ],
+      "high_area_fraction_mean": 0.49994245171546936,
+      "high_area_fraction_std": 0.05856884643435478,
+      "interface_density_mean": 0.005810018663047167,
+      "interface_density_std": 0.002197718454151503,
+      "autocorrelation_by_lag_nodes": {
+        "1": 0.9881891012191772,
+        "5": 0.9487560391426086,
+        "10": 0.9056656360626221,
+        "20": 0.8285714983940125,
+        "40": 0.693428099155426,
+        "80": 0.4634363353252411
+      }
+    }
+  }
+}

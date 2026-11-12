@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/zenteiq-research/scirex/security/advisories/new
+    about: Report vulnerabilities privately here, never in a public issue. See SECURITY.md. If you cannot use GitHub, email research@zenteiq.ai instead.

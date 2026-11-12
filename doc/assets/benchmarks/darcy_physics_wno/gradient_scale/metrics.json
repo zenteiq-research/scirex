@@ -1,0 +1,13 @@
+{
+  "batch_size": 20,
+  "seed": 0,
+  "n_real_components": 2829601,
+  "fraction_below_eps": 0.9509255898623162,
+  "eps": 1e-08,
+  "median_abs_grad": 6.37861996295036e-13,
+  "global_norm": 0.0013133172178640962,
+  "global_norm_scaled_by_interior_nodes": 9.047442313865758,
+  "fraction_below_eps_scaled": 0.5412572302596727,
+  "median_abs_grad_scaled": 4.394231292476503e-09,
+  "interior_nodes": 6889
+}

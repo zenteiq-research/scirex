@@ -1,0 +1,70 @@
+{
+  "problem": "pipe",
+  "model": "transolver",
+  "label": "Zenteiq",
+  "source": "doc/benchmarks/pipe/results/comparative.md (numbers transcribed from the page; the checkpoints are not in git)",
+  "dataset": {
+    "train": "first 1000 samples",
+    "test": "last 200 samples",
+    "grid": "129x129",
+    "input": "(x, y) mesh coordinates",
+    "output": "channel 0 of Pipe_Q.npy"
+  },
+  "protocol": {
+    "ntrain": 1000,
+    "ntest": 200,
+    "optimizer": "adamw",
+    "lr": 0.001,
+    "weight_decay": 1e-05,
+    "pct_start": 0.3,
+    "div_factor": 25.0,
+    "final_div_factor": 10000.0,
+    "max_grad_norm": 0.1,
+    "epochs": 500,
+    "batch_size": 8,
+    "loss": "relative L2"
+  },
+  "metric": "relative L2 on the 200 test samples",
+  "arch": {
+    "n_hidden": 128,
+    "n_layers": 8,
+    "n_heads": 8,
+    "mlp_ratio": 2,
+    "slice_num": 64
+  },
+  "n_params": 3073985,
+  "test_rel_l2": {
+    "jax_runs": [
+      {"run": 1, "rel_l2": 0.00523, "epoch": 499, "wall_h": 3.91},
+      {"run": 2, "rel_l2": 0.004894, "epoch": 489, "wall_h": 3.0},
+      {"run": 3, "rel_l2": 0.004701, "epoch": 495, "wall_h": 1.86}
+    ],
+    "jax_mean": 0.004942,
+    "jax_std": 0.000219,
+    "jax_best": 0.004701
+  },
+  "pytorch_reference": {
+    "script": "thuml/Transolver PDE-Solving-StandardBenchmark/exp_pipe.py",
+    "runs": [
+      {"run": 1, "rel_l2": 0.004706, "epoch": 492, "wall_h": 3.8},
+      {"run": 2, "rel_l2": 0.004298, "epoch": 495, "wall_h": 3.35},
+      {"run": 3, "rel_l2": 0.005294, "epoch": 485, "wall_h": 3.36}
+    ],
+    "mean": 0.004766,
+    "std": 0.000409
+  },
+  "tuned_recipe": {
+    "lr": 0.002789574430295683,
+    "weight_decay": 0.0002497328610406061,
+    "max_grad_norm": 0.4884053941402852,
+    "batch_size": 4,
+    "pct_start": 0.33415875288593666,
+    "div_factor": 7.126045321233962,
+    "final_div_factor": 8313.101133778735,
+    "seed": 0,
+    "test_rel_l2_last_epoch": 0.00416,
+    "untuned_same_seed": 0.00523
+  },
+  "paper_reported": {"rel_l2": 0.0033, "std": 0.0002},
+  "timing": {"steady_epoch_s": "13-30 (shared-GPU dependent)"}
+}

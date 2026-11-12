@@ -1,0 +1,299 @@
+{
+  "problem": "cavity",
+  "label": "Zenteiq",
+  "reference": {
+    "citation": "Costa Rocha, P.A.; Johnston, S.J.; Oliveira Santos, V.; Aliabadi, A.A.; Th\u00e9, J.V.G.; Gharabaghi, B. Deep Neural Network Modeling for CFD Simulations: Benchmarking the Fourier Neural Operator on the Lid-Driven Cavity Case. Appl. Sci. 2023, 13, 3165.",
+    "doi": "https://doi.org/10.3390/app13053165"
+  },
+  "dataset": {
+    "train_cases": [
+      "01k",
+      "02k",
+      "04k",
+      "06k",
+      "14k",
+      "16k",
+      "18k",
+      "20k"
+    ],
+    "test_case": "10k",
+    "grid": "128x128 cells",
+    "frames": "steps 0 to 100 (first 10 s, every 0.1 s)",
+    "fields": [
+      "p",
+      "Ux",
+      "Uy"
+    ]
+  },
+  "protocol": {
+    "optimizer": "adam",
+    "lr": 0.001,
+    "lr_factor": 0.5,
+    "lr_patience": 10,
+    "early_stop_patience": 50,
+    "epochs": 300,
+    "batch_size": 8,
+    "mc_weight": 0.1,
+    "val_frac": 0.1,
+    "seed": 0
+  },
+  "metric": "RMSE in m/s pooled over p, Ux, Uy on the test case",
+  "rollout_horizon": 10,
+  "baseline_copy_last_frame": {
+    "n_in": 3,
+    "single_step": {
+      "rmse": 0.004399502649903297,
+      "rmse_vel": 0.005358050111681223
+    },
+    "rollout": {
+      "horizon": 10,
+      "n_sequences": 89,
+      "rmse": 0.014957890845835209,
+      "rmse_vel": 0.01820794679224491,
+      "per_step_rmse": [
+        0.004616444930434227,
+        0.007952508516609669,
+        0.010530093684792519,
+        0.012629969045519829,
+        0.014396529644727707,
+        0.015910806134343147,
+        0.017224570736289024,
+        0.018374739214777946,
+        0.01938956044614315,
+        0.020291656255722046
+      ]
+    }
+  },
+  "model": "gino",
+  "runs": {
+    "gino_3to1": {
+      "model": "gino",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "modes": 16,
+        "width": 34,
+        "n_layers": 3,
+        "latent_grid": 32
+      },
+      "n_params": 1058861,
+      "epochs_run": 300,
+      "best_epoch": 295,
+      "best_val_loss": 0.0009919701842591166,
+      "single_step": {
+        "rmse": 0.0019505220698192716,
+        "rmse_vel": 0.002369536319747567,
+        "per_channel": {
+          "p": 0.00042919081170111895,
+          "Ux": 0.0025126689579337835,
+          "Uy": 0.0022171814925968647
+        },
+        "mean_abs_div": 0.11475292593240738
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.002800587099045515,
+        "rmse_vel": 0.003389577381312847,
+        "per_step_rmse": [
+          0.001973492791876197,
+          0.0021744463592767715,
+          0.0023873252794146538,
+          0.0025559321511536837,
+          0.0027126295026391745,
+          0.002860839944332838,
+          0.0030070568900555372,
+          0.003155900863930583,
+          0.0033106610644608736,
+          0.0034745638258755207
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 24.04449287999887,
+        "mean_epoch_s": 5.4313904594499185,
+        "total_min": 27.467170670925405
+      },
+      "checkpoint_sha256": "b10e269969fd7152abca85e3891c8eb46b3a4a4da84b2bb9decbe0fe41608a12"
+    },
+    "best_gino_3to1": {
+      "model": "gino",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "modes": 4,
+        "width": 16,
+        "n_layers": 1,
+        "latent_grid": 32
+      },
+      "n_params": 52260,
+      "epochs_run": 300,
+      "best_epoch": 295,
+      "best_val_loss": 0.0020056424313224853,
+      "single_step": {
+        "rmse": 0.003245356259867549,
+        "rmse_vel": 0.003945867531001568,
+        "per_channel": {
+          "p": 0.0006762372795492411,
+          "Ux": 0.004181868862360716,
+          "Uy": 0.0036948206834495068
+        },
+        "mean_abs_div": 0.2063552439212799
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.008169573731720448,
+        "rmse_vel": 0.00992128811776638,
+        "per_step_rmse": [
+          0.00331076025031507,
+          0.004607824608683586,
+          0.0056829433888196945,
+          0.006585948169231415,
+          0.007443058770149946,
+          0.008271084167063236,
+          0.009094899520277977,
+          0.009934167377650738,
+          0.0108080068603158,
+          0.01172716449946165
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 20.017646351945587,
+        "mean_epoch_s": 4.919521620761476,
+        "total_min": 24.84924351599378
+      },
+      "checkpoint_sha256": "b2a4394e57d42815fbfdf0a0a5e95ed1c2753393f8216afc588f2251632a8ef4"
+    }
+  },
+  "search": {
+    "gino": {
+      "paper_table1_50_epochs": null,
+      "paper_table2_300_epochs": null,
+      "n_beating_paper_table2": null,
+      "configs": [
+        {
+          "name": "search_gino_L1_m4_w16_g32",
+          "arch": {
+            "modes": 4,
+            "width": 16,
+            "n_layers": 1,
+            "latent_grid": 32
+          },
+          "n_params": 52260,
+          "best_val_loss": 0.005023140064440668,
+          "rmse": 0.005010548513382673
+        },
+        {
+          "name": "search_gino_L2_m4_w32_g16",
+          "arch": {
+            "modes": 4,
+            "width": 32,
+            "n_layers": 2,
+            "latent_grid": 16
+          },
+          "n_params": 105260,
+          "best_val_loss": 0.005100268218666315,
+          "rmse": 0.00530084315687418
+        },
+        {
+          "name": "search_gino_L2_m8_w16_g16",
+          "arch": {
+            "modes": 8,
+            "width": 16,
+            "n_layers": 2,
+            "latent_grid": 16
+          },
+          "n_params": 87644,
+          "best_val_loss": 0.005209406511858106,
+          "rmse": 0.005210873205214739
+        },
+        {
+          "name": "search_gino_L1_m8_w32_g16",
+          "arch": {
+            "modes": 8,
+            "width": 32,
+            "n_layers": 1,
+            "latent_grid": 16
+          },
+          "n_params": 135868,
+          "best_val_loss": 0.005210169171914458,
+          "rmse": 0.005468182731419802
+        },
+        {
+          "name": "search_gino_L1_m16_w8_g32",
+          "arch": {
+            "modes": 16,
+            "width": 8,
+            "n_layers": 1,
+            "latent_grid": 32
+          },
+          "n_params": 62168,
+          "best_val_loss": 0.006489578308537603,
+          "rmse": 0.0055390289053320885
+        },
+        {
+          "name": "search_gino_L1_m8_w8_g32",
+          "arch": {
+            "modes": 8,
+            "width": 8,
+            "n_layers": 1,
+            "latent_grid": 32
+          },
+          "n_params": 48856,
+          "best_val_loss": 0.006618254538625479,
+          "rmse": 0.006187029182910919
+        },
+        {
+          "name": "search_gino_L1_m4_w8_g32",
+          "arch": {
+            "modes": 4,
+            "width": 8,
+            "n_layers": 1,
+            "latent_grid": 32
+          },
+          "n_params": 45272,
+          "best_val_loss": 0.006896060262806714,
+          "rmse": 0.005919390823692083
+        },
+        {
+          "name": "search_gino_L3_m8_w8_g16",
+          "arch": {
+            "modes": 8,
+            "width": 8,
+            "n_layers": 3,
+            "latent_grid": 16
+          },
+          "n_params": 59408,
+          "best_val_loss": 0.00722861192189157,
+          "rmse": 0.006357087288051844
+        },
+        {
+          "name": "search_gino_L1_m4_w8_g16",
+          "arch": {
+            "modes": 4,
+            "width": 8,
+            "n_layers": 1,
+            "latent_grid": 16
+          },
+          "n_params": 45272,
+          "best_val_loss": 0.007317050360143185,
+          "rmse": 0.006906575057655573
+        },
+        {
+          "name": "search_gino_L3_m4_w8_g16",
+          "arch": {
+            "modes": 4,
+            "width": 8,
+            "n_layers": 3,
+            "latent_grid": 16
+          },
+          "n_params": 48656,
+          "best_val_loss": 0.007963893096894025,
+          "rmse": 0.0067878528498113155
+        }
+      ]
+    }
+  }
+}

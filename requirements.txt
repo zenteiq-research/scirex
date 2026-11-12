@@ -1,0 +1,17 @@
+jax==0.6.2
+jaxlib==0.6.2
+flax==0.10.7
+optax==0.2.8
+numpy==1.26.4
+opt-einsum==3.4.0
+einops==0.8.2
+tensorly==0.9.0
+wandb==0.26.0
+zencfg==0.7.0
+matplotlib==3.9.4
+open3d==0.19.0
+jaxwt==0.1.1
+scipy==1.15.3
+requests==2.34.2
+scikit-learn==1.7.2
+safetensors==0.8.0

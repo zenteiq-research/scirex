@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      # --unsafe only parses: mkdocs.yml uses !!python/name: tags that the safe loader rejects.
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, develop]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.10
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+
+  - repo: local
+    hooks:
+      - id: copyright-check
+        name: copyright-check
+        entry: python scripts/check_copyright.py
+        language: python
+        types: [python]
+        exclude: ^scripts/check_copyright\.py$

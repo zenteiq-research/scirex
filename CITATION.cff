@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use ScireX in research, please cite the software and the relevant method papers."
+title: "ScireX"
+abstract: "Production-grade JAX/Flax implementations of Neural Operators for scientific machine learning."
+type: software
+authors:
+  - name: "ZenteiQ AiTech Innovations Pvt. Ltd."
+    email: research@zenteiq.ai
+version: "1.0.0"
+license: "LGPL-3.0-only"
+repository-code: "https://github.com/zenteiq-research/scirex"
+url: "https://github.com/zenteiq-research/scirex"
+keywords:
+  - Neural Operators
+  - Scientific Machine Learning
+  - Physics Informed Operator Learning
+  - JAX
+  - Flax
+  - PDEs
+date-released: "2026-11-12"

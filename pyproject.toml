@@ -1,0 +1,270 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+[project]
+name = "scirex"
+# The only place the version is written. scirex.__version__ reads it back from the package
+# metadata; the deploy workflows and CITATION.cff are checked against it (tests/test_version.py).
+version = "1.0.0"
+description = "Production-grade JAX/Flax neural operators for scientific machine learning."
+dynamic = ["readme"]
+requires-python = ">=3.10,<3.13"
+license = "LGPL-3.0-only"
+license-files = ["LICENSE", "COPYING"]
+authors = [
+    { name = "ZenteiQ AiTech Innovations Pvt. Ltd.", email = "research@zenteiq.ai" },
+]
+maintainers = [
+    { name = "ZenteiQ SciML Research Team", email = "research@zenteiq.ai" },
+]
+keywords = [
+    "neural-operator",
+    "scientific-machine-learning",
+    "jax",
+    "flax",
+    "pde",
+    "fno",
+    "gino",
+    "wno",
+    "transolver",
+    "surrogate-modeling",
+    "deep-learning",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+# Ranges, not exact pins: a library must not force one version on the environment it
+# is installed into. The lower bound is the version scirex is tested with; the upper
+# bound stops at the next release that may break it (jax, flax, optax and tensorly
+# change their API between minor releases, so they are capped at the next minor).
+# The exact, tested versions are in requirements.txt (use it as a lock file for
+# reproducible environments and Docker images). open3d and wandb are optional: see the
+# `open3d`, `wandb` and `benchmark` extras.
+dependencies = [
+    "jax>=0.6.2,<0.7",
+    "jaxlib>=0.6.2,<0.7",
+    "flax>=0.10.7,<0.11",
+    "optax>=0.2.8,<0.3",
+    "numpy>=1.26.4,<2",
+    "opt-einsum>=3.4,<4",
+    "einops>=0.8.2,<0.9",
+    "tensorly>=0.9,<0.10",
+    "zencfg>=0.7,<0.8",
+    "matplotlib>=3.9.4,<4",
+    "jaxwt>=0.1.1,<0.2",
+    "scipy>=1.15.3,<2",
+    "requests>=2.34.2,<3",
+    "scikit-learn>=1.7.2,<2",
+    "safetensors>=0.8,<0.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/zenteiq-research/scirex"
+Documentation = "https://github.com/zenteiq-research/scirex/tree/main/doc"
+Repository = "https://github.com/zenteiq-research/scirex"
+Issues = "https://github.com/zenteiq-research/scirex/issues"
+Changelog = "https://github.com/zenteiq-research/scirex/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+cuda = ["jax[cuda12]>=0.6.2,<0.7"]  # same as cuda12, kept for older instructions
+cuda12 = ["jax[cuda12]>=0.6.2,<0.7"]
+tpu = ["jax[tpu]>=0.6.2,<0.7"]
+dev  = [
+    "pytest>=8.1.1",
+    "pytest-xdist>=3.5",
+    "pytest-benchmark>=4.0",
+    "pytest-cov>=5.0",
+    "pytest-env>=1.1",
+    "pytest-timeout>=2.3",
+    "flaky>=3.8.1",
+    "ruff>=0.4.0",
+    "mypy>=1.10",
+    "pre-commit>=3.7",
+    "packaging>=23",
+    "build>=1.0",
+    "twine>=5.0",
+    "tomli>=2; python_version < '3.11'",
+]
+# Weights & Biases logging (scirex._internal.wandb_utils); training works without it.
+wandb = ["wandb>=0.26,<1"]
+# Fast radius search and MeshDataModule (open3d is imported only when they are used).
+# On macOS open3d is held at 0.19.x: its 0.20 wheel links the Homebrew library libusb and
+# does not import without it, while the 0.19 wheel (universal2) needs nothing else.
+open3d = [
+    "open3d>=0.19,<0.21; sys_platform != 'darwin'",
+    "open3d>=0.19,<0.20; sys_platform == 'darwin'",
+]
+benchmark = [
+    "wandb>=0.26,<1",
+    "open3d>=0.19,<0.21; sys_platform != 'darwin'",
+    "open3d>=0.19,<0.20; sys_platform == 'darwin'",
+    "vtk>=9.0",
+    "meshio>=5.0",
+    "pandas>=2.0",
+    "python-docx>=1.1",
+]
+# Mesh generation (src/scirex/experimental/geometry/gmsh_mesh.py): a developer-machine tool,
+# not needed to train or evaluate any benchmark, so it stays out of the
+# benchmark extra. Already guarded with a clear ImportError at the call site.
+mesh = [
+    "gmsh>=4.11",
+    "meshio>=5.0",
+]
+# Hyperparameter search (scripts/benchmarks/pipe/tune_transolver.py). The
+# minimums are the versions it was checked with; it uses Ray's newer
+# tune.RunConfig / tune.get_context / tune.report(dict) API.
+tune = [
+    "ray[tune]>=2.58",
+    "optuna>=5.0",
+]
+# MLflow-tracked Optuna tuner (src/scirex/experimental/tuning). Framework-agnostic: it wraps any
+# build_model/train_fn pair. psycopg is the Postgres driver for the shared
+# Optuna storage in docker/hpo; plotly renders the study plots logged to MLflow.
+hpo = [
+    "optuna>=5.0",
+    "mlflow>=3.9.0",
+    "plotly>=5.0",
+    "psycopg[binary]>=3.1",
+]
+docs = [
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+    "markdown>=3.5",
+    "ruff>=0.4",
+    "pymdown-extensions>=10.0,<11",
+]
+# Everything needed to run every file in the repository on CPU: tests, benchmarks,
+# tuning, meshing, docs and the release checks. Hardware wheels are chosen separately:
+#   pip install -e ".[all,cuda12]"   (NVIDIA GPU)   or   pip install -e ".[all,tpu]"
+# scripts/dev/check_extras.py checks that every import in the repository is covered.
+all = [
+    "scirex[dev,hpo,benchmark,mesh,tune,docs]",
+]
+
+# --- Build system ---
+[build-system]
+requires      = ["hatchling", "hatch-fancy-pypi-readme>=24.1"]
+build-backend = "hatchling.build"
+
+# The source distribution carries the package, its tests and the legal files, not the
+# documentation site, images, animations, CI files or benchmark scripts (those stay in
+# the repository). scripts/dev/check_package.py checks the result.
+# PyPI does not resolve relative links, so the README on the package page gets absolute
+# links to the repository. The README in the repository is unchanged. The second rule
+# takes any link left after the image rule, so a badge that is an image inside a link
+# is rewritten too.
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(!\[[^\]]*\]\()(?!https?:|#)([^)]+\))'
+replacement = '\1https://raw.githubusercontent.com/zenteiq-research/scirex/main/\2'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(\]\()(?!https?:|#|mailto:)([^)]+\))'
+replacement = '\1https://github.com/zenteiq-research/scirex/blob/main/\2'
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/conftest.py",
+    "/pytest.ini",
+    "/pyproject.toml",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/CITATION.cff",
+    "/LICENSE",
+    "/COPYING",
+    "/NOTICE",
+    "/THIRD_PARTY_NOTICES.md",
+    "/SECURITY.md",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scirex"]
+exclude = ["**/tests/**"]
+
+# --- Ruff ---
+[tool.ruff]
+# src layout: first-party detection for isort (scirex in src/, scripts in .)
+src = ["src", "."]
+
+[tool.ruff.lint]
+# RUF includes RUF022 (sorted __all__, added in ruff 0.2.0). D enforces docstrings
+# on the PUBLIC API only (see per-file-ignores). Only stable rules: no preview.
+# ERA001 (commented-out code), T201 (print), TD and FIX (TODO/FIXME notes) are
+# enforced on src/ only: library code logs through `logging`, keeps no dead code and no
+# open TODOs. Tests and scripts are exempt below.
+select = ["E", "F", "I", "UP", "ANN", "NPY", "RUF", "D", "ERA", "T20", "TD", "FIX"]
+ignore = [
+    "ANN101", "ANN102", "E741", "ANN401",
+    # pydocstyle: keep the rules that gate API documentation (D100-D104, D106, D103,
+    # D2xx section/format errors); drop the purely stylistic ones that fire on
+    # hundreds of legacy docstrings without improving the rendered docs.
+    "D105",  # magic methods
+    "D205",  # blank line between summary and description (228 legacy hits)
+    "D400",  # first line ends with period (superseded in spirit by D415)
+    "D401",  # imperative mood (48 hits, many false positives on noun-phrase summaries)
+]
+
+[tool.ruff.lint.pydocstyle]
+# The codebase documents with numpy-style "Parameters / Returns" sections.
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**"   = ["ANN", "D", "ERA", "T20", "TD", "FIX"]
+"scripts/**" = ["ANN", "D", "ERA", "T20", "TD", "FIX"]
+"docker/**"  = ["ANN", "D", "ERA", "T20", "TD", "FIX"]
+# pydocstyle is for the public API: internal/experimental code and any
+# underscore-prefixed (private) module is exempt. `__init__.py` is NOT exempt
+# (`[!_]` keeps dunder files out of the `_*` glob).
+"src/scirex/_internal/**"     = ["D"]
+"src/scirex/experimental/**"  = ["D"]
+"src/scirex/**/_[!_]*.py"     = ["D"]
+# ANN: zencfg config classes are plain attribute bags, not annotated for API consumers.
+# RUF012: zencfg's ConfigBase.__setattr__ runs every field through a pydantic
+# TypeAdapter built from get_type_hints(); wrapping a field in typing.ClassVar
+# makes that TypeAdapter construction raise at instantiation (pydantic can't
+# generate a schema for ClassVar), so the suggested fix breaks every config
+# class at runtime and can't be applied here.
+"src/scirex/config/**" = ["ANN", "RUF012"]
+
+# --- Mypy ---
+[tool.mypy]
+python_version         = "3.10"
+ignore_missing_imports = true
+strict                 = false
+mypy_path              = "src"
+
+# --- Coverage ---
+[tool.coverage.run]
+source = ["scirex"]
+# scirex.config was never measured (it sat outside `source` as the top-level
+# `config` package); keep it out so fail_under compares like with like.
+omit   = ["tests/*", "*/tests/*", "scripts/*", "src/scirex/config/*"]
+# Emit repo-relative paths in coverage.xml so SonarQube can match coverage to
+# analysed source files. Without this, absolute CI paths fail to resolve and
+# Sonar silently reports 0% coverage.
+relative_files = true
+
+[tool.coverage.report]
+# Coverage gate restored after the data/model/training/losses/mpu+utils test
+# phases landed. CI (CPU-only, torch absent so the torch-gated data-loader tests
+# skip) measures 66.21% total coverage; the gate is set just below that with a
+# small margin. Locally, with torch installed, coverage is ~69.7%.
+fail_under = 65

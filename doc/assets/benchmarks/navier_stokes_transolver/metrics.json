@@ -1,0 +1,112 @@
+{
+  "problem": "navier_stokes",
+  "label": "Zenteiq",
+  "dataset": {
+    "file": "NavierStokes_V1e-5_N1200_T20.mat",
+    "train": "first 1000 samples",
+    "test": "last 200 samples",
+    "grid": "64x64",
+    "input": "vorticity at t = 1-10",
+    "output": "vorticity at t = 11-20, one step at a time"
+  },
+  "protocol": {
+    "ntrain": 1000,
+    "ntest": 200,
+    "t_in": 10,
+    "t_out": 10,
+    "adam_eps": 1e-08,
+    "lr": 0.001,
+    "weight_decay": 1e-05,
+    "pct_start": 0.3,
+    "div_factor": 25.0,
+    "final_div_factor": 10000.0,
+    "max_grad_norm": null,
+    "epochs": 500,
+    "batch_size": 2,
+    "loss": "relative L2 per sample and step, summed over the batch and the teacher-forced steps",
+    "seed": 0
+  },
+  "metric": "relative L2 per test sample over the 10 frames of the autoregressive rollout (test_l2_full of exp_ns.py)",
+  "weights": "last epoch (no validation split, so no epoch selection)",
+  "paper_reference": {
+    "model": "Transolver",
+    "test_rel_l2": 0.09,
+    "source": "Wu et al. 2024 (ICML), Transolver"
+  },
+  "copy_last_frame_baseline": {
+    "test_rel_l2": 0.7480663061141968,
+    "per_step_rel_l2": [
+      0.20368528366088867,
+      0.35925671458244324,
+      0.49631401896476746,
+      0.611550509929657,
+      0.7057594060897827,
+      0.7806549072265625,
+      0.8367262482643127,
+      0.8718180060386658,
+      0.8789294362068176,
+      0.8554375171661377
+    ]
+  },
+  "model": "transolver",
+  "arch": {
+    "n_layers": 8,
+    "n_hidden": 256,
+    "n_head": 8,
+    "mlp_ratio": 1,
+    "slice_num": 32,
+    "ref": 8,
+    "unified_pos": true,
+    "dropout_rate": 0.0,
+    "gelu": "exact",
+    "layer_norm_epsilon": 1e-05,
+    "conv_init": "torch"
+  },
+  "cycle_momentum": true,
+  "optimizer": "adamw",
+  "n_params": 11232321,
+  "vs_transolver_params": 0.0,
+  "test_rel_l2": {
+    "mean": 0.08716674894094467,
+    "median": 0.07959330081939697,
+    "p90": 0.12983626276254653,
+    "max": 0.36165183782577515
+  },
+  "per_step_rel_l2": [
+    0.010858782567083836,
+    0.01917952299118042,
+    0.02751798927783966,
+    0.036676790565252304,
+    0.04665340855717659,
+    0.057940930128097534,
+    0.07295339554548264,
+    0.09273014962673187,
+    0.11779043823480606,
+    0.1501363068819046
+  ],
+  "final_epoch_test_rel_l2_logged": 0.08733829103410244,
+  "contour_sample": 78,
+  "timing": {
+    "first_epoch_s": 393.8094519637525,
+    "steady_epoch_s": 197.6783609688282,
+    "total_h": 25.193190330231253
+  },
+  "checkpoint_sha256": "125653b6448a5183483f85de0c93f6b05c555610c3772aa01264da5a19a0e02b",
+  "provenance": {
+    "git_commit": "839d69e52ce2c1f3b9561b59c4a5a279cb9d5136",
+    "git_dirty": false,
+    "jax": "0.6.2",
+    "flax": "0.10.7",
+    "optax": "0.2.8",
+    "device": "TFRT_CPU_0",
+    "created_utc": "2026-10-14T06:01:40+00:00",
+    "converted_from": "transolver_ns_v2_parity/transolver_ns_params.bytes (weights after the last epoch, 499) and its loss_curve.csv",
+    "source_sha256": "125653b6448a5183483f85de0c93f6b05c555610c3772aa01264da5a19a0e02b",
+    "trained_by": "an earlier standalone training script, same recipe, data, model and seed, with the PyTorch-reference numerics (exact GELU, LayerNorm eps 1e-5, torch Conv2d init, beta1 cycling)",
+    "trained": "2026-10-12 to 2026-10-13",
+    "data_file": "NavierStokes_V1e-5_N1200_T20.mat",
+    "training_device": "NVIDIA RTX PRO 6000 Blackwell Max-Q (cuda:0); the device field above is where this conversion ran",
+    "note": "Trained before this benchmark's train.py existed. Its weight init kept the (256, 1) output-projection kernel at Flax's default (the orthogonality check's rank-1 false positive, 9 kernels kept); train.py reinitialises it like every other Linear (8 kept). Otherwise the same recipe, data, model and seed.",
+    "timing_note": "Trained on one RTX PRO 6000 Blackwell GPU shared with up to five other jobs; per-epoch times are not a controlled measure."
+  }
+}

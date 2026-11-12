@@ -1,0 +1,129 @@
+{
+  "problem": "pipe",
+  "model": "transolver",
+  "label": "Zenteiq",
+  "dataset": {
+    "train": "first 1000 samples",
+    "test": "last 200 samples",
+    "grid": "129x129",
+    "input": "(x, y) mesh coordinates",
+    "output": "channel 0 of Pipe_Q.npy"
+  },
+  "protocol": {
+    "ntrain": 1000,
+    "ntest": 200,
+    "n_total": 1200,
+    "optimizer": "adamw_cx",
+    "adam_eps": 1e-08,
+    "lr": 0.002789574430295683,
+    "weight_decay": 0.0002497328610406061,
+    "pct_start": 0.33415875288593666,
+    "div_factor": 7.126045321233962,
+    "final_div_factor": 8313.101133778735,
+    "max_grad_norm": 0.4884053941402852,
+    "epochs": 500,
+    "batch_size": 4,
+    "loss": "relative L2, summed over the batch",
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "metric": "relative L2 per test sample, in physical units",
+  "weights": "last epoch (no validation split, so no epoch selection)",
+  "arch": {
+    "n_hidden": 128,
+    "n_layers": 8,
+    "n_head": 8,
+    "mlp_ratio": 2,
+    "slice_num": 64,
+    "ref": 8,
+    "dropout_rate": 0.0
+  },
+  "n_params": 3073985,
+  "vs_transolver_params": 0.0,
+  "test_rel_l2_over_seeds": {
+    "n_seeds": 3,
+    "mean": 0.004063207811365525,
+    "std": 0.0003430214400503854,
+    "min": 0.003859986085444689,
+    "max": 0.004459249321371317
+  },
+  "figure_seed": 1,
+  "contour_sample": 161,
+  "seeds": {
+    "0": {
+      "test_rel_l2": {
+        "mean": 0.004459249321371317,
+        "median": 0.0013852252159267664,
+        "p90": 0.009162998665124175,
+        "max": 0.05906165763735771
+      },
+      "final_epoch_test_rel_l2_logged": 0.004457847943995148,
+      "timing": {
+        "first_epoch_s": 55.095824191346765,
+        "steady_epoch_s": 25.950909309089184,
+        "total_min": 215.2370279400299
+      },
+      "checkpoint_sha256": "a7a7bf2c3415bbbf4f0a882f5adc967af0a5cbcdf4e35e713dae424f4be8b966",
+      "provenance": {
+        "git_commit": "216a98ec9d37ee3f24d8c0d61ce4d2f989fbd795",
+        "git_dirty": false,
+        "jax": "0.6.2",
+        "flax": "0.10.7",
+        "optax": "0.2.8",
+        "device": "cuda:0",
+        "created_utc": "2026-11-04T10:29:28+00:00"
+      }
+    },
+    "1": {
+      "test_rel_l2": {
+        "mean": 0.003859986085444689,
+        "median": 0.001172896008938551,
+        "p90": 0.0065426407847553455,
+        "max": 0.06077459454536438
+      },
+      "final_epoch_test_rel_l2_logged": 0.00385942165623419,
+      "timing": {
+        "first_epoch_s": 52.56286096945405,
+        "steady_epoch_s": 24.81077011115849,
+        "total_min": 210.7616314798283
+      },
+      "checkpoint_sha256": "5c9b2e2c519bd1ffad1bca700e3f06f109ffd39f32ee75e434930dbf84a70a4a",
+      "provenance": {
+        "git_commit": "216a98ec9d37ee3f24d8c0d61ce4d2f989fbd795",
+        "git_dirty": false,
+        "jax": "0.6.2",
+        "flax": "0.10.7",
+        "optax": "0.2.8",
+        "device": "cuda:0",
+        "created_utc": "2026-11-04T10:24:59+00:00"
+      }
+    },
+    "2": {
+      "test_rel_l2": {
+        "mean": 0.003870388027280569,
+        "median": 0.001128027681261301,
+        "p90": 0.005742682190611957,
+        "max": 0.059515662491321564
+      },
+      "final_epoch_test_rel_l2_logged": 0.00386584734194912,
+      "timing": {
+        "first_epoch_s": 25.35838525183499,
+        "steady_epoch_s": 12.475757060572505,
+        "total_min": 105.74108384900416
+      },
+      "checkpoint_sha256": "e59a768bcf61a38d148d169b6dde67a543297d889144ef8c24a224d7dc3d3f23",
+      "provenance": {
+        "git_commit": "216a98ec9d37ee3f24d8c0d61ce4d2f989fbd795",
+        "git_dirty": false,
+        "jax": "0.6.2",
+        "flax": "0.10.7",
+        "optax": "0.2.8",
+        "device": "cuda:0",
+        "created_utc": "2026-11-04T08:52:13+00:00"
+      }
+    }
+  }
+}

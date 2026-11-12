@@ -1,0 +1,7 @@
+{#- SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd. | SPDX-License-Identifier: LGPL-3.0-only -#}
+{#- English labels of the theme with a few wording changes. -#}
+{% import "partials/languages/en.html" as language %}
+{% macro t(key) %}{{ {
+  "toc": "On this page",
+  "search.placeholder": "Search"
+}[key] or language.t(key) }}{% endmacro %}

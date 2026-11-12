@@ -1,0 +1,108 @@
+{
+  "problem": "airfrans",
+  "model": "wno",
+  "label": "Zenteiq",
+  "dataset": {
+    "source": "AirfRANS (Bonnet et al., NeurIPS 2022), manifest 'full' task",
+    "train": "manifest full_train minus its last 80 cases (720)",
+    "validation": "last 80 cases of full_train (logged only)",
+    "test": "manifest full_test (200)",
+    "nodes": "every node of the internal mesh, no crop",
+    "input": "7 official node features + log10 wall distance + log10 Re",
+    "output": "Ux, Uy, p, nut"
+  },
+  "protocol": {
+    "n_train": 720,
+    "n_val": 80,
+    "n_test": 200,
+    "subsample": 32000,
+    "batch_size": 1,
+    "optimizer": "adam",
+    "lr": 0.001,
+    "pct_start": 0.3,
+    "div_factor": 25.0,
+    "final_div_factor": 10000.0,
+    "base_momentum": 0.85,
+    "max_momentum": 0.95,
+    "surf_weight": 1.0,
+    "epochs": 500,
+    "seed": 0,
+    "val_every": 10,
+    "val_repeats": 20,
+    "additions": {
+      "features": "log10(|wall distance| + 1e-6) and log10(Re), Re = U_inf / 1.56e-5",
+      "targets": "(Ux, Uy) / U_inf, p / U_inf^2, nut / U_inf, then normalised",
+      "ema_decay": 0.9995,
+      "grad_clip_global_norm": 10.0,
+      "matmul_precision": "highest",
+      "epochs": "500 (official: 398)"
+    }
+  },
+  "metric": "official Transolver Results_test: Volume / Surf = normalised MSE on non-wall / wall nodes, mean over 4 channels and 200 cases, wall Ux, Uy, nut set to 0; C_L, C_D from integrated pressure and wall shear stress; Spearman rho over the 200 cases",
+  "weights": "EMA of the weights after the last epoch (nothing selected on held-out data)",
+  "arch": {
+    "H": 128,
+    "W": 256,
+    "hidden": 28,
+    "n_layers": 4,
+    "level": 4,
+    "wavelet": "db4",
+    "latent": 64,
+    "dec_hidden": 256,
+    "dec_layers": 3
+  },
+  "n_params": 3964728,
+  "vs_paper_params": 0.018275249565180784,
+  "results": {
+    "n_cases": 200,
+    "volume": 0.004464991024914537,
+    "surf": 0.0014535832337577784,
+    "relerr_cl": 0.029694795488927464,
+    "spearman_cl": 0.9995769894247358,
+    "relerr_cd": 0.17426242311726814,
+    "spearman_cd": 0.75227180679517,
+    "volume_per_channel": {
+      "Ux": 0.0010095655206233036,
+      "Uy": 0.000967404233335739,
+      "p": 0.0016281983728231647,
+      "nut": 0.014254795972875947
+    },
+    "volume_distribution": {
+      "median": 0.0013084487515508058,
+      "p90": 0.007731589585101871,
+      "max": 0.11647250349729632
+    },
+    "relerr_cl_median": 0.01134340652372905
+  },
+  "paper_reference": {
+    "volume": 0.0037,
+    "surf": 0.0142,
+    "relerr_cl": 0.103,
+    "spearman_cl": 0.9978,
+    "n_params_used": 3893572,
+    "source": "Wu et al., Transolver, ICML 2024, Table 3"
+  },
+  "vs_paper": {
+    "volume_ratio": 1.206754331057983,
+    "surf_ratio": 0.10236501646181537,
+    "relerr_cl_ratio": 0.28829898532939285
+  },
+  "contour_case": "airFoil2D_SST_64.144_0.932_1.956_3.115_0.0_17.336",
+  "timing": {
+    "first_epoch_s": 54.3,
+    "steady_epoch_s": 9.2,
+    "total_h": 1.812638888888889
+  },
+  "checkpoint_sha256": "47da8cf12c6ad6927273d87eceb77b4e8345e9451cc1473041a445a6fc9f7885",
+  "provenance": {
+    "git_commit": "9c5296949b19ae33f5fdecdeba0c98dc596249b6",
+    "git_dirty": true,
+    "jax": "0.6.2",
+    "flax": "0.10.7",
+    "optax": "0.2.8",
+    "device": "cuda:0",
+    "created_utc": "2026-10-12T05:30:07+00:00",
+    "converted_from": "AirfRANS_Results/Task03_wno_airfrans/train_wno_v2.py (run wno_v2_500ep_highest), trained 2026-10-09/10 on one NVIDIA RTX PRO 6000 Blackwell GPU shared with other jobs; converted to this format without retraining",
+    "note": "epoch wall times include a duty-cycle throttle (GPU shared at 50 %) for part of the run"
+  }
+}

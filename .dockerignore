@@ -1,0 +1,43 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Large runtime artifacts - not needed in the image
+data/
+checkpoints/
+wandb/
+jax_profiles_epoch/
+neighbor_logs/
+
+# Docs
+doc/
+mkdocs.yml
+
+# dist/ is NOT excluded: prod installs scirex from the wheel built there
+# (see docker/Dockerfile's prod stage). Build it fresh immediately before
+# `docker build` -- `rm -rf dist && python -m build --wheel` -- so this
+# directory holds exactly one current wheel, not stale ones from a prior
+# version.
+
+# Internal documents and run logs - never in an image
+internal/
+logs/
+*.log
+
+# Secrets - never belong in an image layer
+.env
+.env.*
+*.pem
+*.key
+credentials.json

@@ -1,0 +1,8 @@
+# Documentation build dependencies for ScireX (MkDocs + Material).
+# Mirrors the `docs` extra in pyproject.toml; used by the CI docs job.
+mkdocs>=1.6,<2
+mkdocs-material>=9.5
+mkdocstrings[python]>=0.25
+markdown>=3.5
+ruff>=0.4
+pymdown-extensions>=10.0,<11

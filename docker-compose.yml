@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        # The container runs as a non-root user; match it to the host user so
+        # files written to the bind mount below keep the right ownership.
+        # Run `export HOST_UID=$(id -u) HOST_GID=$(id -g)` (or use `make
+        # docker-dev`); defaults to 1000.
+        UID: ${HOST_UID:-1000}
+        GID: ${HOST_GID:-1000}
+    volumes:
+      # Mount the entire project so edits on the host are immediately
+      # visible inside the container (editable install links to /workspace).
+      - .:/workspace
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  prod:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: prod
+      args:
+        # Match the host user so ./checkpoints written by the container stays
+        # owned by the host user (same as the dev service).
+        UID: ${HOST_UID:-1000}
+        GID: ${HOST_GID:-1000}
+    volumes:
+      # Mount data read-only and persist checkpoints/outputs on the host.
+      - ./data:/workspace/data:ro
+      - ./checkpoints:/workspace/checkpoints
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

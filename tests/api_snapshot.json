@@ -1,0 +1,132 @@
+{
+  "scirex": [
+    "FNO",
+    "GINO",
+    "Transolver",
+    "WNO",
+    "get_model_jax"
+  ],
+  "scirex.config": [
+    "FNOConfig",
+    "FNOHuge2d",
+    "FNOLarge2d",
+    "FNOMedium2d",
+    "FNOMedium3d",
+    "FNOSmall2d",
+    "GINOConfig",
+    "GINODarcy2d",
+    "GINOPoisson2d",
+    "GINOSmall3d",
+    "ModelConfig",
+    "OptimizationConfig",
+    "PatchingConfig",
+    "SimpleFNOConfig",
+    "TransolverAirfRANS",
+    "TransolverConfig",
+    "TransolverDarcy2dAligned",
+    "TransolverKappaOperator2d",
+    "TransolverLaplace2d",
+    "TransolverPipe",
+    "TransolverPipeOfficial",
+    "TransolverShapeNetCar"
+  ],
+  "scirex.data": [
+    "DefaultDataProcessor",
+    "DictDataset",
+    "TensorDataset",
+    "UnitGaussianNormalizer",
+    "load_airfrans",
+    "load_cavity_kepsilon",
+    "load_darcy_flow_small",
+    "load_darcy_pt",
+    "load_navier_stokes_pt",
+    "load_shapenet_car"
+  ],
+  "scirex.data.containers": [
+    "DictDataset",
+    "TensorDataset"
+  ],
+  "scirex.data.datasets": [
+    "load_airfrans",
+    "load_cavity_kepsilon",
+    "load_darcy_flow_small",
+    "load_darcy_pt",
+    "load_navier_stokes_pt",
+    "load_shapenet_car"
+  ],
+  "scirex.data.transforms": [
+    "DefaultDataProcessor",
+    "UnitGaussianNormalizer"
+  ],
+  "scirex.layers": [
+    "BaseSpectralConv",
+    "ChannelMLP",
+    "FNOBlocks",
+    "GNOBlock",
+    "GridEmbedding2D",
+    "GridEmbeddingND",
+    "SpectralConv",
+    "WNOBlock",
+    "WaveletConv",
+    "build_neighbor_graph",
+    "cgelu",
+    "cselu",
+    "ctanh",
+    "edge_index_to_neighbors",
+    "kdtree_neighbor_search",
+    "neighbors_to_segments",
+    "precompute_neighbors"
+  ],
+  "scirex.layers.blocks": [
+    "BaseSpectralConv",
+    "FNOBlocks",
+    "GNOBlock",
+    "SpectralConv",
+    "WNOBlock",
+    "WaveletConv",
+    "build_neighbor_graph",
+    "edge_index_to_neighbors",
+    "kdtree_neighbor_search",
+    "neighbors_to_segments",
+    "precompute_neighbors"
+  ],
+  "scirex.layers.common": [
+    "ChannelMLP",
+    "GridEmbedding2D",
+    "GridEmbeddingND",
+    "cgelu",
+    "cselu",
+    "ctanh"
+  ],
+  "scirex.losses": [
+    "AxisSpec",
+    "DarcyEqnLoss",
+    "DiffusionTerm",
+    "FiniteDiff",
+    "H1Loss",
+    "LpLoss",
+    "Q4Galerkin",
+    "SourceTerm"
+  ],
+  "scirex.models": [
+    "BaseModel",
+    "FNO",
+    "FNOClassic2d",
+    "GINO",
+    "Transolver",
+    "WNO",
+    "available_models",
+    "get_model_jax"
+  ],
+  "scirex.training": [
+    "adamw_cx"
+  ],
+  "scirex.training.optim": [
+    "adamw_cx",
+    "scale_by_adam_cx"
+  ],
+  "scirex.utils": [
+    "count_model_params",
+    "count_tensor_params"
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "problem": "cavity",
+  "label": "Zenteiq",
+  "reference": {
+    "citation": "Costa Rocha, P.A.; Johnston, S.J.; Oliveira Santos, V.; Aliabadi, A.A.; Th\u00e9, J.V.G.; Gharabaghi, B. Deep Neural Network Modeling for CFD Simulations: Benchmarking the Fourier Neural Operator on the Lid-Driven Cavity Case. Appl. Sci. 2023, 13, 3165.",
+    "doi": "https://doi.org/10.3390/app13053165"
+  },
+  "dataset": {
+    "train_cases": [
+      "01k",
+      "02k",
+      "04k",
+      "06k",
+      "14k",
+      "16k",
+      "18k",
+      "20k"
+    ],
+    "test_case": "10k",
+    "grid": "128x128 cells",
+    "frames": "steps 0 to 100 (first 10 s, every 0.1 s)",
+    "fields": [
+      "p",
+      "Ux",
+      "Uy"
+    ]
+  },
+  "protocol": {
+    "optimizer": "adam",
+    "lr": 0.001,
+    "lr_factor": 0.5,
+    "lr_patience": 10,
+    "early_stop_patience": 50,
+    "epochs": 300,
+    "batch_size": 8,
+    "mc_weight": 0.1,
+    "val_frac": 0.1,
+    "seed": 0
+  },
+  "metric": "RMSE in m/s pooled over p, Ux, Uy on the test case",
+  "rollout_horizon": 10,
+  "baseline_copy_last_frame": {
+    "n_in": 3,
+    "single_step": {
+      "rmse": 0.004399502649903297,
+      "rmse_vel": 0.005358050111681223
+    },
+    "rollout": {
+      "horizon": 10,
+      "n_sequences": 89,
+      "rmse": 0.014957890845835209,
+      "rmse_vel": 0.01820794679224491,
+      "per_step_rmse": [
+        0.004616444930434227,
+        0.007952508516609669,
+        0.010530093684792519,
+        0.012629969045519829,
+        0.014396529644727707,
+        0.015910806134343147,
+        0.017224570736289024,
+        0.018374739214777946,
+        0.01938956044614315,
+        0.020291656255722046
+      ]
+    }
+  },
+  "model": "wno",
+  "runs": {
+    "wno_3to1": {
+      "model": "wno",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "hidden_channels": 21,
+        "n_layers": 3,
+        "level": 5
+      },
+      "n_params": 1042073,
+      "epochs_run": 300,
+      "best_epoch": 294,
+      "best_val_loss": 0.0006694779178360478,
+      "single_step": {
+        "rmse": 0.002040914725512266,
+        "rmse_vel": 0.002484262455254793,
+        "per_channel": {
+          "p": 0.00039099299465306103,
+          "Ux": 0.002555032493546605,
+          "Uy": 0.002411417430266738
+        },
+        "mean_abs_div": 0.07746511697769165
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.006037632469087839,
+        "rmse_vel": 0.007334863767027855,
+        "per_step_rmse": [
+          0.002097047632560134,
+          0.003000634955242276,
+          0.003827136941254139,
+          0.004619438201189041,
+          0.005388983059674501,
+          0.006128443405032158,
+          0.006842834874987602,
+          0.007530559785664082,
+          0.008193586021661758,
+          0.00882470328360796
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 22.647836592048407,
+        "mean_epoch_s": 4.637445664002146,
+        "total_min": 23.487401502144834
+      },
+      "checkpoint_sha256": "9225c13865adb7c1566f8b8e28340a041dde6a4a305fdfefbe79746c853f8d49"
+    },
+    "best_wno_3to1": {
+      "model": "wno",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "hidden_channels": 32,
+        "n_layers": 1,
+        "level": 4
+      },
+      "n_params": 1333155,
+      "epochs_run": 300,
+      "best_epoch": 294,
+      "best_val_loss": 0.0006691099144518376,
+      "single_step": {
+        "rmse": 0.0021280713845044374,
+        "rmse_vel": 0.0025900714099407196,
+        "per_channel": {
+          "p": 0.0004112461465410888,
+          "Ux": 0.0028124935925006866,
+          "Uy": 0.002346661174669862
+        },
+        "mean_abs_div": 0.07001194357872009
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.007918077521026134,
+        "rmse_vel": 0.009562009945511818,
+        "per_step_rmse": [
+          0.0022064032964408398,
+          0.0035081657115370035,
+          0.004758642055094242,
+          0.0058449311181902885,
+          0.006901181302964687,
+          0.007885945960879326,
+          0.008866758085787296,
+          0.009867052547633648,
+          0.010943641886115074,
+          0.012141602113842964
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 15.543706624070182,
+        "mean_epoch_s": 2.882097610545401,
+        "total_min": 14.621514869619084
+      },
+      "checkpoint_sha256": "1eeba07ca3d2984dc3f12c2dd25447a275e16a6c243bd50a72ebc677da07da6d"
+    }
+  },
+  "search": {
+    "wno": {
+      "paper_table1_50_epochs": null,
+      "paper_table2_300_epochs": null,
+      "n_beating_paper_table2": null,
+      "configs": [
+        {
+          "name": "search_wno_L1_v4_h32",
+          "arch": {
+            "hidden_channels": 32,
+            "n_layers": 1,
+            "level": 4
+          },
+          "n_params": 1333155,
+          "best_val_loss": 0.0015384346072096378,
+          "rmse": 0.002816497115418315
+        },
+        {
+          "name": "search_wno_L1_v4_h16",
+          "arch": {
+            "hidden_channels": 16,
+            "n_layers": 1,
+            "level": 4
+          },
+          "n_params": 334803,
+          "best_val_loss": 0.0017208111064974218,
+          "rmse": 0.003413196885958314
+        },
+        {
+          "name": "search_wno_L1_v5_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 1,
+            "level": 5
+          },
+          "n_params": 51883,
+          "best_val_loss": 0.0018855216796509922,
+          "rmse": 0.0032709757797420025
+        },
+        {
+          "name": "search_wno_L3_v5_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 3,
+            "level": 5
+          },
+          "n_params": 152379,
+          "best_val_loss": 0.0019138778909109533,
+          "rmse": 0.003341072238981724
+        },
+        {
+          "name": "search_wno_L3_v4_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 3,
+            "level": 4
+          },
+          "n_params": 250683,
+          "best_val_loss": 0.0019208147306926549,
+          "rmse": 0.0034749521873891354
+        },
+        {
+          "name": "search_wno_L2_v5_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 2,
+            "level": 5
+          },
+          "n_params": 102131,
+          "best_val_loss": 0.00192327905097045,
+          "rmse": 0.0032042269594967365
+        },
+        {
+          "name": "search_wno_L1_v3_h16",
+          "arch": {
+            "hidden_channels": 16,
+            "n_layers": 1,
+            "level": 3
+          },
+          "n_params": 643027,
+          "best_val_loss": 0.001969918661052361,
+          "rmse": 0.003771067364141345
+        },
+        {
+          "name": "search_wno_L2_v3_h16",
+          "arch": {
+            "hidden_channels": 16,
+            "n_layers": 2,
+            "level": 3
+          },
+          "n_params": 1283299,
+          "best_val_loss": 0.00206536840996705,
+          "rmse": 0.0035486328415572643
+        },
+        {
+          "name": "search_wno_L1_v3_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 1,
+            "level": 3
+          },
+          "n_params": 161707,
+          "best_val_loss": 0.0021430716733448207,
+          "rmse": 0.0039145504124462605
+        },
+        {
+          "name": "search_wno_L2_v4_h8",
+          "arch": {
+            "hidden_channels": 8,
+            "n_layers": 2,
+            "level": 4
+          },
+          "n_params": 167667,
+          "best_val_loss": 0.0021497540234122424,
+          "rmse": 0.00383859034627676
+        }
+      ]
+    }
+  }
+}

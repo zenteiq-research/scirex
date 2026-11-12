@@ -1,0 +1,301 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+site_name: ScireX
+site_description: Production-grade JAX/Flax Neural Operators for Scientific Machine Learning
+site_url: https://zenteiq-research.github.io/scirex
+repo_url: https://github.com/zenteiq-research/scirex
+repo_name: GitHub
+
+copyright: >
+  © 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+  Documentation licensed under CC BY 4.0; code examples LGPL-3.0-only unless noted.
+
+# Documentation sources live in ./doc (not the MkDocs default ./docs).
+docs_dir: doc
+
+# Theme overrides and API templates live inside doc/ but are not site content.
+exclude_docs: |
+  _overrides/
+  _templates/
+  _hooks/
+  # Written by a maintainer script; shown in tabs on install/logs.md
+  install/logs_linux_ubuntu24.04.md
+  install/logs_linux_ubuntu24.04_cuda12.md
+  install/logs_linux_ubuntu26.04.md
+  install/logs_windows11.md
+  install/logs_macos27.md
+  install/logs_TPUv6e8.md
+
+# Publishes CODE_OF_CONDUCT.md, GOVERNANCE.md and the other root policy files as pages.
+hooks:
+  - doc/_hooks/project_files.py
+  - doc/_hooks/repo_links.py
+  - doc/_hooks/page_titles.py
+  - doc/_hooks/section_colour.py
+
+theme:
+  name: material
+  custom_dir: doc/_overrides
+  language: custom
+  font:
+    text: Roboto
+    code: Roboto Mono
+  logo: assets/brand/scirex-logo-header.png
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/brand/scirex-icon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - mkdocstrings:
+      custom_templates: doc/_templates
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            heading_level: 2
+            members_order: source
+            docstring_style: numpy
+            docstring_section_style: table
+            merge_init_into_class: true
+            show_signature_annotations: true
+            separate_signature: true
+            signature_crossrefs: false
+            filters: ["!^_", "!^setup$"]
+            # Flax modules declare their parameters as dataclass fields, so the
+            # documented constructor parameters are not in a visible __init__ signature.
+            docstring_options:
+              warn_unknown_params: false
+              warn_missing_types: false
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/vibrant.css
+
+# MathJax 3 needs no helper scripts. Every external script is pinned to an exact version;
+# scripts/tests/test_mkdocs_config.py enforces that.
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
+  - javascripts/home_results.js
+
+nav:
+  - Home: index.md
+  - Install:
+      - Install with pip: install/index.md
+      - Docker: install/docker.md
+      - From Source: install/source.md
+      - Verify: install/verify.md
+      - Uninstall: install/uninstall.md
+      - Troubleshooting: install/troubleshooting.md
+      - Installation Logs: install/logs.md
+  - Learn:
+      - Introduction: learn/index.md
+      - Quickstart: user_guide/quickstart.md
+      - Problem Types: learn/problem_types.md
+      - Tutorials by Model: tutorials/index.md
+      - Concepts:
+        - Operator Learning: theory_guide/operator_learning.md
+      - Regular Grids:
+          - Darcy Flow:
+              - FNO: tutorials/FNO/Darcy_FNO.md
+              - WNO: tutorials/Others/Darcy_WNO.md
+              - GINO: tutorials/Others/Darcy_GINO.md
+              - Transolver: tutorials/Others/Darcy_Transolver.md
+          - Navier-Stokes 2D:
+              - FNO: tutorials/FNO/NavierStokes_FNO.md
+              - WNO: tutorials/Others/NavierStokes_WNO.md
+              - GINO: tutorials/Others/NavierStokes_GINO.md
+              - Transolver: tutorials/Others/NavierStokes_Transolver.md
+          - Lid-Driven Cavity:
+              - FNO: tutorials/Others/Cavity_FNO.md
+              - WNO: tutorials/WNO/Cavity_WNO.md
+              - GINO: tutorials/Others/Cavity_GINO.md
+              - Transolver: tutorials/Others/Cavity_Transolver.md
+      - Irregular Domains and Geometry:
+          - Pipe Flow:
+              - FNO: tutorials/Others/Pipe_FNO.md
+              - WNO: tutorials/Others/Pipe_WNO.md
+              - GINO: tutorials/GINO/Pipe_GINO.md
+              - Transolver: tutorials/Others/Pipe_Transolver.md
+          - Chip Cooling:
+              - FNO: tutorials/Others/ChipCooling_FNO.md
+              - WNO: tutorials/WNO/ChipCooling_WNO.md
+              - GINO: tutorials/Others/ChipCooling_GINO.md
+              - Transolver: tutorials/Others/ChipCooling_Transolver.md
+          - AirfRANS:
+              - WNO: tutorials/Others/AirfRANS_WNO.md
+              - GINO: tutorials/Others/AirfRANS_GINO.md
+              - Transolver: tutorials/Transolver/AirfRANS_Transolver.md
+          - ShapeNetCar:
+              - GINO: tutorials/Others/ShapeNetCar_GINO.md
+              - Transolver: tutorials/Transolver/ShapeNetCar_Transolver.md
+          - Car-CFD:
+              - GINO: tutorials/GINO/CarCFD_GINO.md
+              - Transolver: tutorials/Others/CarCFD_Transolver.md
+      - Physics-Informed Learning:
+          - Darcy Flow, Physics-Only:
+              - FNO: tutorials/DarcyPhysics/DarcyPhysics_FNO.md
+              - WNO: tutorials/DarcyPhysics/DarcyPhysics_WNO.md
+              - GINO: tutorials/DarcyPhysics/DarcyPhysics_GINO.md
+              - Transolver: tutorials/DarcyPhysics/DarcyPhysics_Transolver.md
+      - Guides:
+          - Add a New Example:
+              - Overview: tutorials/NewExample/Overview.md
+              - Add a Model: tutorials/NewExample/Add_a_Model.md
+              - Add a Problem: tutorials/NewExample/Add_a_Problem.md
+              - Required Tests: tutorials/NewExample/Required_Tests.md
+              - "Worked Example: 1D Poisson, FNO": tutorials/NewExample/Poisson1D_FNO.md
+              - PR Checklist: tutorials/NewExample/PR_Checklist.md
+          - Workflow: user_guide/workflow.md
+          - Config: user_guide/config.md
+          - Models and Losses: user_guide/models_and_losses.md
+          - Complex-Parameter Optimisers: user_guide/complex_optimisers.md
+          - Checkpoints and Reproducibility: user_guide/checkpoints_and_reproducibility.md
+          - Training Scripts: user_guide/training.md
+          - Hyperparameter Tuning: user_guide/hpo.md
+          - Physics-Informed Losses: loss_guide/overview.md
+  - Datasets:
+      - Overview: dataset_guide/index.md
+      - Darcy Flow: dataset_guide/darcy_2d.md
+      - Navier-Stokes 2D: dataset_guide/navier_stokes.md
+      - Lid-Driven Cavity: dataset_guide/cavity.md
+      - Pipe Flow: dataset_guide/pipe.md
+      - Chip Cooling: dataset_guide/chip_cooling.md
+      - AirfRANS: dataset_guide/airfrans.md
+      - ShapeNetCar: dataset_guide/shapenetcar.md
+      - Car-CFD: dataset_guide/car_cfd.md
+  - API:
+      - Overview: api/index.md
+      - scirex.models: api/models.md
+      - scirex.layers: api/layers.md
+      - scirex.losses: api/losses.md
+      - scirex.data: api/data.md
+      - scirex.training: api/training.md
+      - scirex.config: api/config.md
+      - scirex.utils: api/utils.md
+      - scirex.experimental: api/experimental.md
+  - Benchmarks:
+      - Overview: benchmarks/index.md
+      - Results Summary: benchmarks/comparison.md
+      - Accuracy: benchmarks/accuracy.md
+      - Compute Cost: benchmarks/compute_cost.md
+      - Setup: benchmarks/setup.md
+      - Problem Classification: benchmarks/classification.md
+      - Problem Cards:
+          - Darcy Flow:
+              - Overview: benchmarks/darcy/README.md
+              - Results: benchmarks/darcy/results/comparative.md
+          - Darcy Flow, Physics-Only:
+              - Overview: benchmarks/darcy_physics/README.md
+              - Setup: benchmarks/darcy_physics/results/setup.md
+              - Results: benchmarks/darcy_physics/results/comparative.md
+          - Navier-Stokes 2D:
+              - Overview: benchmarks/navier_stokes/README.md
+              - Results: benchmarks/navier_stokes/results/comparative.md
+          - Lid-Driven Cavity:
+              - Overview: benchmarks/cavity/README.md
+              - Results: benchmarks/cavity/results/comparative.md
+          - Pipe Flow:
+              - Overview: benchmarks/pipe/README.md
+              - Results: benchmarks/pipe/results/comparative.md
+          - Chip Cooling:
+              - Overview: benchmarks/chip_cooling/README.md
+              - Results: benchmarks/chip_cooling/results/comparative.md
+          - AirfRANS:
+              - Overview: benchmarks/airfrans/README.md
+              - Results: benchmarks/airfrans/results/comparative.md
+          - ShapeNetCar:
+              - Overview: benchmarks/shapenetcar/README.md
+              - Results: benchmarks/shapenetcar/results/comparative.md
+          - Car-CFD:
+              - Overview: benchmarks/car_cfd/README.md
+              - Results: benchmarks/car_cfd/results/comparative.md
+      - Reproducibility:
+          - Reproduce our benchmarks: benchmarks/reproducibility.md
+          - Checkpoint Cards: benchmarks/cards/index.md
+      - Experimental:
+          - Overview: benchmarks/experimental/index.md
+          - "GIWO: ShapeNetCar results": benchmarks/experimental/shapenetcar_giwo.md
+          - "GIWO: Car-CFD results": benchmarks/experimental/car_cfd_giwo.md
+          - "GIWO: ShapeNetCar tutorial": tutorials/Others/ShapeNetCar_GIWO.md
+          - "GIWO: Car-CFD tutorial": tutorials/Others/CarCFD_GIWO.md
+          - Checkpoint Cards: benchmarks/cards/experimental.md
+  - Usage: user_guide/use_on_your_data.md
+  - Resources:
+      - Overview: resources/index.md
+      - Developer Guide:
+          - dev_guide/index.md
+          - Contributing: dev_guide/contributing.md
+          - JAX Patterns: dev_guide/jax_patterns.md
+          - Naming Rules: dev_guide/naming.md
+          - API Policy: dev_guide/api_policy.md
+          - Problem Card Template: dev_guide/problem_card_template.md
+      - Licence: LICENSE.md
+      - Project Policies:
+          - Code of Conduct: project/code_of_conduct.md
+          - Governance: project/governance.md
+          - Security Policy: project/security.md
+          - Contributor Licence Agreement: project/cla.md
+          - Corporate CLA: project/cla_corporate.md
+          - Changelog: project/changelog.md
+          - Citation: project/citation.md
+          - Third-Party Notices: project/third_party_notices.md
+          - NOTICE: project/notice.md
+          - LGPL v3 (LICENSE): project/license_lgpl.md
+          - GPL v3 (COPYING): project/license_gpl.md
+  - Community: community/index.md

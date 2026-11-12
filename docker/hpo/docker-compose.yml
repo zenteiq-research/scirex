@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+# Postgres (MLflow backend store + Optuna storage)  ->  MLflow server (UI on :5000)
+#
+#   python docker/hpo/make_env.py          # once: writes the gitignored .env
+#   docker compose -f docker/hpo/docker-compose.yml up -d --build
+#   open http://localhost:5000
+#
+# The search itself runs on the host, where the GPU is, and talks to both
+# services through the ports published below:
+#
+#   tracking_uri = "http://localhost:5000"
+#   storage      = "postgresql+psycopg://mlflow:mlflow@localhost:5433/optuna"
+#
+# Local-development defaults: both ports are bound to localhost only and MLflow
+# has no authentication. To change the database password, export
+# HPO_POSTGRES_PASSWORD before `up` and use it in `storage`. Do not expose this
+# stack beyond the machine without putting authentication in front of it.
+name: hpo
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: ${HPO_POSTGRES_PASSWORD:-mlflow}
+      POSTGRES_DB: mlflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      # 5433, not 5432: the default port is commonly taken by another database
+      # on shared GPU machines. Localhost only.
+      - "${HPO_BIND_ADDR:?run docker/hpo/make_env.py first}:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow"]
+      interval: 3s
+      retries: 20
+
+  mlflow:
+    build: .
+    image: hpo-mlflow:latest
+    entrypoint: ["mlflow", "server"]
+    command:
+      - --host=${HPO_MLFLOW_HOST:?run docker/hpo/make_env.py first}
+      - --port=5000
+      - --backend-store-uri=postgresql://mlflow:${HPO_POSTGRES_PASSWORD:-mlflow}@postgres:5432/mlflow
+      - --artifacts-destination=/data/artifacts
+      - --serve-artifacts
+      # Host headers MLflow 3 accepts: browsers and the search use localhost.
+      - --allowed-hosts=mlflow,mlflow:5000,localhost,localhost:5000
+    ports:
+      - "${HPO_BIND_ADDR:?run docker/hpo/make_env.py first}:5000:5000"
+    volumes:
+      - artifacts:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      retries: 30
+
+volumes:
+  pgdata:
+  artifacts:

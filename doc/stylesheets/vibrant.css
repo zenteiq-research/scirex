@@ -1,0 +1,381 @@
+/*
+ * SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+ * SPDX-License-Identifier: CC-BY-4.0
+ */
+
+/* Colour layer: solid accent colours on top of extra.css. No gradients.
+   Turquoise stays the anchor. Each top-level tab has its own pair of accents (--zq-a,
+   --zq-b), set from the data-zq-section attribute that doc/_hooks/section_colour.py
+   writes on <body>. Code blocks are left as they are. */
+
+:root {
+  /* Section accents mapped onto the ZenteiQ palette (BrandColor 2026). The names are kept
+     so the section and admonition rules below stay unchanged. */
+  --zq-cyan: var(--zq-turquoise-shade-1);  /* #4D9D91 */
+  --zq-blue: var(--zq-teal-shade-2);       /* #254348 */
+  --zq-violet: var(--zq-teal);             /* #3C6F78 */
+  --zq-pink: var(--zq-brick);              /* #C35A5B */
+  --zq-a: var(--zq-turquoise);
+  --zq-b: var(--zq-violet);
+  /* Solid text colours for headings and links */
+  --zq-heading: var(--zq-teal-shade-2);    /* #254348 */
+  --zq-link: var(--zq-teal-shade-1);       /* #315A60 */
+  /* text-safe versions of the accents: darker on white, lighter on dark */
+  --zq-ink-mix: #1d2b2d 38%;
+}
+[data-md-color-scheme="slate"] {
+  --zq-ink-mix: #ffffff 18%;
+  /* Lighter brand tints on the dark scheme, so accent text stays readable */
+  --zq-cyan: var(--zq-turquoise-tint-1);   /* #81CEC3 */
+  --zq-blue: var(--zq-turquoise-tint-2);   /* #A2D9D2 */
+  --zq-violet: var(--zq-teal-tint-2);      /* #8AA9AE */
+  --zq-pink: var(--zq-coral);              /* #F27070 */
+  --zq-heading: var(--zq-turquoise-tint-2); /* #A2D9D2 */
+  --zq-link: var(--zq-turquoise-tint-1);   /* #81CEC3 */
+}
+
+[data-zq-section="home"]       { --zq-a: var(--zq-turquoise); --zq-b: var(--zq-violet); }
+[data-zq-section="install"]    { --zq-a: var(--zq-turquoise); --zq-b: var(--zq-cyan); }
+[data-zq-section="usage"]      { --zq-a: var(--zq-turquoise); --zq-b: var(--zq-yellow); }
+[data-zq-section="learn"]      { --zq-a: var(--zq-violet);    --zq-b: var(--zq-blue); }
+[data-zq-section="datasets"]   { --zq-a: var(--zq-coral);     --zq-b: var(--zq-yellow); }
+[data-zq-section="api"]        { --zq-a: var(--zq-cyan);      --zq-b: var(--zq-blue); }
+[data-zq-section="benchmarks"] { --zq-a: var(--zq-turquoise); --zq-b: var(--zq-violet); }
+[data-zq-section="resources"]  { --zq-a: var(--zq-coral);     --zq-b: var(--zq-violet); }
+[data-zq-section="community"]  { --zq-a: var(--zq-pink);      --zq-b: var(--zq-yellow); }
+
+body {
+  --zq-a-ink: color-mix(in srgb, var(--zq-a), var(--zq-ink-mix));
+  --zq-b-ink: color-mix(in srgb, var(--zq-b), var(--zq-ink-mix));
+}
+
+/* Header: a solid line in the section colour under the tabs. */
+.md-tabs {
+  border-bottom: 2px solid var(--zq-a);
+}
+.md-header {
+  border-bottom: 0;
+}
+.md-tabs__item--active,
+[data-md-color-scheme="slate"] .md-tabs__item--active {
+  position: relative;
+  box-shadow: none;
+}
+.md-tabs__item--active::after {
+  content: "";
+  position: absolute;
+  left: 0.4rem;
+  right: 0.4rem;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--zq-a);
+}
+
+/* Tabs: the top navigation tabs and the content tabs (Linux, macOS, Windows) in the
+   link colour, in bold. The current tab is fully opaque, the others a little lighter. */
+.md-tabs__link,
+.md-tabs__link--active,
+[data-md-color-scheme="slate"] .md-tabs__link--active,
+.md-typeset .tabbed-labels > label {
+  color: var(--zq-link);
+  font-weight: 700;
+}
+.md-tabs__link {
+  opacity: 0.78;
+  transition: opacity 0.15s;
+}
+.md-tabs__link--active,
+.md-tabs__link:hover,
+.md-tabs__link:focus {
+  opacity: 1;
+}
+.md-typeset .tabbed-labels > label {
+  opacity: 0.7;
+}
+.md-typeset .tabbed-labels > label:hover,
+.md-typeset .tabbed-set > input:nth-child(1):checked ~ .tabbed-labels > :nth-child(1),
+.md-typeset .tabbed-set > input:nth-child(2):checked ~ .tabbed-labels > :nth-child(2),
+.md-typeset .tabbed-set > input:nth-child(3):checked ~ .tabbed-labels > :nth-child(3),
+.md-typeset .tabbed-set > input:nth-child(4):checked ~ .tabbed-labels > :nth-child(4),
+.md-typeset .tabbed-set > input:nth-child(5):checked ~ .tabbed-labels > :nth-child(5),
+.md-typeset .tabbed-set > input:nth-child(6):checked ~ .tabbed-labels > :nth-child(6),
+.md-typeset .tabbed-set > input:nth-child(7):checked ~ .tabbed-labels > :nth-child(7),
+.md-typeset .tabbed-set > input:nth-child(8):checked ~ .tabbed-labels > :nth-child(8) {
+  opacity: 1;
+}
+.md-typeset .tabbed-set.tabbed-alternate > .tabbed-labels::before,
+.md-typeset .tabbed-labels::before {
+  background: var(--zq-a);
+  height: 3px;
+}
+
+/* Card titles, the left navigation and the table of contents: the link colour and bold
+   weight, as on the tabs. */
+.md-typeset .grid.cards > ul > li > p:first-child > strong,
+.md-typeset .grid > .card > p:first-child > strong,
+.md-nav__link .md-ellipsis {
+  color: var(--zq-link);
+  font-weight: 700;
+}
+.md-nav__link .md-ellipsis {
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+.md-nav__link:hover .md-ellipsis,
+.md-nav__link:focus .md-ellipsis,
+.md-nav__link--active .md-ellipsis {
+  opacity: 1;
+}
+
+/* Links in the page content: bold, in the link colour. Buttons, the e-mail chip, heading
+   anchors and links around images or clips keep their own look. */
+.md-typeset a:not(.md-button):not(.headerlink):not([href^="mailto:"]):not(:has(img, video)) {
+  color: var(--zq-link);
+  font-weight: 700;
+  text-decoration: none;
+}
+.md-typeset a:not(.md-button):not(.headerlink):not([href^="mailto:"]):not(:has(img, video)):hover,
+.md-typeset a:not(.md-button):not(.headerlink):not([href^="mailto:"]):not(:has(img, video)):focus-visible {
+  color: var(--zq-a-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--zq-a-ink);
+}
+.md-typeset a:not(.md-button):not(.headerlink):not([href^="mailto:"]) :is(code, .twemoji, .md-icon, svg) {
+  color: inherit;
+  fill: currentColor;
+}
+
+/* Headings: every heading in the solid heading colour (Deep Muted Teal Shade 2 on white,
+   a light turquoise tint on the dark scheme), with a rule in the section colour under
+   each section heading. */
+.md-typeset :is(h1, h2, h3, h4, h5, h6),
+.md-typeset .zq-hero h1,
+.md-typeset .zq-results__title {
+  font-weight: 700;
+  color: var(--zq-heading);
+  width: fit-content;
+  max-width: 100%;
+}
+.md-typeset :is(h1, h2, h3, h4, h5, h6) :is(code, a:not(.headerlink)) {
+  color: var(--zq-link);
+}
+.md-typeset .headerlink {
+  color: var(--md-default-fg-color--lighter);
+}
+.md-typeset .headerlink:hover,
+.md-typeset .headerlink:focus {
+  color: var(--zq-a-ink);
+}
+/* The rule under a section heading: drawn by ::after, since the heading itself is only
+   as wide as its text. */
+.md-typeset h2 {
+  position: relative;
+  padding-bottom: 0.3em;
+}
+.md-typeset h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(34rem, 85vw);
+  height: 2px;
+  background: var(--zq-a);
+}
+
+/* Left navigation and the table of contents: the current page in the section colour. */
+.md-nav--primary .md-nav__link--active,
+.md-nav--primary .md-nav__item--section:first-of-type > .md-nav__link--active {
+  background: color-mix(in srgb, var(--zq-a) 16%, transparent);
+  color: var(--zq-a-ink);
+  box-shadow: inset 3px 0 0 var(--zq-a);
+}
+.md-nav--primary .md-nav__container > .md-nav__link {
+  background: none;
+  box-shadow: none;
+}
+.md-nav--secondary .md-nav__link--active {
+  color: var(--zq-a-ink);
+}
+.md-nav__link:hover,
+.md-nav__link:focus {
+  color: var(--zq-a-ink);
+}
+
+/* Cards: a solid bar on top, a faint tint of the section colour, a coloured shadow on
+   hover. */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid > .card,
+.zq-features > div {
+  position: relative;
+  overflow: hidden;
+  border-top-width: 1px;
+  border-top-color: var(--md-default-fg-color--lightest);
+  background: color-mix(in srgb, var(--zq-a) 4%, var(--md-default-bg-color));
+}
+.md-typeset .grid.cards > ul > li::before,
+.md-typeset .grid > .card::before,
+.zq-features > div::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--zq-a);
+}
+.md-typeset .grid.cards > ul > li:hover,
+.md-typeset .grid > .card:hover {
+  border-color: color-mix(in srgb, var(--zq-a) 60%, transparent);
+  box-shadow:
+    0 8px 22px color-mix(in srgb, var(--zq-a) 22%, transparent),
+    0 2px 6px color-mix(in srgb, var(--zq-b) 14%, transparent);
+}
+.md-typeset .grid.cards > ul > li strong,
+.zq-features h3 {
+  color: var(--zq-a-ink);
+}
+.md-typeset .grid.cards > ul > li > p:first-child > .twemoji,
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li > p:first-child > .twemoji {
+  background: color-mix(in srgb, var(--zq-a) 20%, transparent);
+  color: var(--zq-a-ink);
+}
+
+/* Tables: a tinted header row and a tinted row on hover. */
+.md-typeset table:not([class]) thead {
+  background: color-mix(in srgb, var(--zq-a) 16%, transparent);
+}
+.md-typeset table:not([class]) th,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background: transparent;
+  color: var(--zq-a-ink);
+}
+.md-typeset table:not([class]) tbody tr:hover {
+  background-color: color-mix(in srgb, var(--zq-a) 8%, transparent);
+}
+
+/* Admonitions: a tinted body and title in the colour of their kind. */
+.md-typeset .admonition,
+.md-typeset details {
+  --zq-adm: var(--zq-teal);
+  border-color: var(--zq-adm);
+  background: color-mix(in srgb, var(--zq-adm) 6%, transparent);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--zq-adm) 10%, transparent);
+}
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  --zq-adm: var(--zq-turquoise);
+}
+.md-typeset :is(.admonition, details) > :is(.admonition-title, summary) {
+  background: color-mix(in srgb, var(--zq-adm) 16%, transparent);
+}
+.md-typeset :is(.admonition, details):is(.tip, .success, .hint) { --zq-adm: var(--zq-turquoise); }
+.md-typeset :is(.admonition, details):is(.info, .todo, .abstract, .summary) { --zq-adm: var(--zq-cyan); }
+.md-typeset :is(.admonition, details):is(.example, .question, .help, .faq) { --zq-adm: var(--zq-violet); }
+.md-typeset :is(.admonition, details):is(.warning, .caution, .attention) { --zq-adm: var(--zq-yellow); }
+.md-typeset :is(.admonition, details):is(.danger, .error, .failure, .bug) { --zq-adm: var(--zq-coral); }
+.md-typeset :is(.admonition, details):is(.quote, .cite) { --zq-adm: var(--zq-pink); }
+
+/* Buttons: solid turquoise fill for the primary button, a lighter tint and a shadow on
+   hover. Dark text passes contrast on both. */
+.md-typeset .md-button--primary,
+[data-md-color-scheme="slate"] .md-typeset .md-button--primary {
+  background: var(--zq-turquoise);
+  border-color: transparent;
+  color: var(--zq-dark);
+}
+.md-typeset .md-button {
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+.md-typeset .md-button:hover,
+.md-typeset .md-button--primary:hover {
+  background: var(--zq-turquoise-tint-1);
+  border-color: transparent;
+  color: var(--zq-dark);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--zq-a) 35%, transparent);
+  transform: translateY(-1px);
+}
+
+/* Blockquotes and the back-to-top button. */
+.md-typeset blockquote {
+  border-left: 0.2rem solid var(--zq-a);
+}
+.md-top {
+  background: var(--zq-turquoise);
+  color: var(--zq-dark);
+}
+
+/* Footer: a solid line in the section colour on top and a dark teal body. */
+.md-footer {
+  border-top: 3px solid var(--zq-a);
+}
+.md-footer,
+.md-footer-meta {
+  background: var(--zq-teal-shade-2);
+}
+
+/* Home page: solid frames and tints. */
+.zq-hero {
+  position: relative;
+}
+.zq-hero__code,
+[data-md-color-scheme="slate"] .zq-hero__code {
+  border-top: 1px solid rgba(96, 196, 181, 0.25);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 34px color-mix(in srgb, var(--zq-violet) 18%, transparent);
+}
+/* A lighter dark box than the page, in both colour schemes, with a visible outline. */
+.zq-hero__code,
+[data-md-color-scheme="slate"] .zq-hero__code {
+  background: var(--zq-teal-shade-1);
+  border: 1px solid color-mix(in srgb, var(--zq-turquoise) 55%, transparent);
+}
+/* Comments stay readable on the lighter box. */
+.zq-hero__code .highlight .c1,
+.zq-hero__code .highlight .c {
+  color: #bcd3cf;
+}
+/* The copy button: a vibrant yellow icon on a visible chip. */
+.md-typeset .zq-hero__code .md-code__nav {
+  background: color-mix(in srgb, var(--zq-yellow) 18%, transparent);
+  border: 1px solid var(--zq-yellow);
+  border-radius: 0.3rem;
+}
+.md-typeset .zq-hero__code .md-code__button,
+.md-typeset .zq-hero__code .md-clipboard {
+  color: var(--zq-yellow);
+}
+.md-typeset .zq-hero__code .md-code__button:hover,
+.md-typeset .zq-hero__code .md-code__button.focus-visible,
+.md-typeset .zq-hero__code .md-clipboard:hover {
+  color: #ffffff;
+}
+.zq-hero__code::before,
+.zq-results::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--zq-turquoise);
+}
+.zq-band {
+  background: color-mix(in srgb, var(--zq-turquoise) 10%, transparent);
+}
+.zq-results {
+  position: relative;
+  overflow: hidden;
+  border-top-width: 1px;
+  background: color-mix(in srgb, var(--zq-turquoise) 7%, transparent);
+}
+.zq-carousel__dot[aria-current="true"] {
+  background: var(--zq-turquoise);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-typeset .md-button {
+    transition: none;
+  }
+}

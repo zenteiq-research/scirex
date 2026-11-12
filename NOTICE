@@ -1,0 +1,33 @@
+ScireX: A ZenteiQ Open-Source Project
+Copyright (C) 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+
+PROJECT IDENTITY
+
+ScireX is developed and maintained as a ZenteiQ open-source project.
+For ZenteiQ-owned material, the public project identity, copyright holder and
+maintainer is ZenteiQ AiTech Innovations Pvt. Ltd. Individual employee names
+are not required in ZenteiQ-authored file headers or project metadata.
+
+LICENSING SCOPE
+
+1. Unless otherwise stated, ScireX source code, tests, build scripts
+   and code examples are licensed under the GNU Lesser General Public License
+   version 3.0 only (SPDX: LGPL-3.0-only).
+
+2. ZenteiQ-authored documentation, diagrams and non-code tutorial content are
+   licensed under the Creative Commons Attribution 4.0 International licence
+   (SPDX: CC-BY-4.0), except where a file states otherwise.
+
+3. Datasets and model weights are licensed separately. Their licences are
+   stated on the Hugging Face repositories (https://huggingface.co/zenteiq-ai).
+   Do not assume the ScireX software licence applies to data or weights.
+
+4. Customer data, confidential datasets and proprietary ZenteiQ assets are
+   not licensed under LGPL-3.0-only or CC-BY-4.0 unless an accompanying file
+   expressly says so.
+
+5. Third-party software, data and other materials retain their original
+   licences, copyright notices and attribution. See THIRD_PARTY_NOTICES.md.
+
+The ZenteiQ and ScireX names, logos and branding are not licensed by
+the software or content licences above.

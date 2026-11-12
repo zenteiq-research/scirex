@@ -1,0 +1,99 @@
+{
+  "problem": "navier_stokes",
+  "label": "Zenteiq",
+  "dataset": {
+    "file": "NavierStokes_V1e-5_N1200_T20.mat",
+    "train": "first 1000 samples",
+    "test": "last 200 samples",
+    "grid": "64x64",
+    "input": "vorticity at t = 1-10",
+    "output": "vorticity at t = 11-20, one step at a time"
+  },
+  "protocol": {
+    "ntrain": 1000,
+    "ntest": 200,
+    "t_in": 10,
+    "t_out": 10,
+    "adam_eps": 1e-08,
+    "lr": 0.001,
+    "weight_decay": 1e-05,
+    "pct_start": 0.3,
+    "div_factor": 25.0,
+    "final_div_factor": 10000.0,
+    "max_grad_norm": null,
+    "epochs": 500,
+    "batch_size": 2,
+    "loss": "relative L2 per sample and step, summed over the batch and the teacher-forced steps",
+    "seed": 0
+  },
+  "metric": "relative L2 per test sample over the 10 frames of the autoregressive rollout (test_l2_full of exp_ns.py)",
+  "weights": "last epoch (no validation split, so no epoch selection)",
+  "paper_reference": {
+    "model": "Transolver",
+    "test_rel_l2": 0.09,
+    "source": "Wu et al. 2024 (ICML), Transolver"
+  },
+  "copy_last_frame_baseline": {
+    "test_rel_l2": 0.7480663061141968,
+    "per_step_rel_l2": [
+      0.20368528366088867,
+      0.35925671458244324,
+      0.49631401896476746,
+      0.611550509929657,
+      0.7057594060897827,
+      0.7806549072265625,
+      0.8367262482643127,
+      0.8718180060386658,
+      0.8789294362068176,
+      0.8554375171661377
+    ]
+  },
+  "model": "fno",
+  "arch": {
+    "hidden_channels": 98,
+    "n_modes": [
+      16,
+      16
+    ],
+    "n_layers": 4
+  },
+  "cycle_momentum": false,
+  "optimizer": "adamw_cx",
+  "n_params": 11183467,
+  "vs_transolver_params": -0.004349412734910296,
+  "test_rel_l2": {
+    "mean": 0.07048521190881729,
+    "median": 0.06311037391424179,
+    "p90": 0.1227761499583721,
+    "max": 0.27785125374794006
+  },
+  "per_step_rel_l2": [
+    0.019242102280259132,
+    0.022983944043517113,
+    0.025964925065636635,
+    0.02947983518242836,
+    0.034528862684965134,
+    0.04257409647107124,
+    0.05396224930882454,
+    0.07015589624643326,
+    0.09392693638801575,
+    0.12749019265174866
+  ],
+  "final_epoch_test_rel_l2_logged": 0.07045677106827497,
+  "contour_sample": 96,
+  "timing": {
+    "first_epoch_s": 39.50781198218465,
+    "steady_epoch_s": 17.99081532098353,
+    "total_h": 2.4989316391872447
+  },
+  "checkpoint_sha256": "ca73632a95e35a163d81cfe7a5ce82cc4fab194074e61289a4bf943d471231d8",
+  "provenance": {
+    "git_commit": "38dab3c1c62da873518cb4b082e25b4e478da7e4",
+    "git_dirty": true,
+    "jax": "0.6.2",
+    "flax": "0.10.7",
+    "optax": "0.2.8",
+    "device": "cuda:0",
+    "created_utc": "2026-10-30T12:02:09+00:00"
+  }
+}

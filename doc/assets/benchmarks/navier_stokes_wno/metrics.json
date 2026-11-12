@@ -1,0 +1,105 @@
+{
+  "problem": "navier_stokes",
+  "label": "Zenteiq",
+  "dataset": {
+    "file": "NavierStokes_V1e-5_N1200_T20.mat",
+    "train": "first 1000 samples",
+    "test": "last 200 samples",
+    "grid": "64x64",
+    "input": "vorticity at t = 1-10",
+    "output": "vorticity at t = 11-20, one step at a time"
+  },
+  "protocol": {
+    "ntrain": 1000,
+    "ntest": 200,
+    "t_in": 10,
+    "t_out": 10,
+    "adam_eps": 1e-08,
+    "lr": 0.001,
+    "weight_decay": 1e-05,
+    "pct_start": 0.3,
+    "div_factor": 25.0,
+    "final_div_factor": 10000.0,
+    "max_grad_norm": null,
+    "epochs": 500,
+    "batch_size": 2,
+    "loss": "relative L2 per sample and step, summed over the batch and the teacher-forced steps",
+    "seed": 0
+  },
+  "metric": "relative L2 per test sample over the 10 frames of the autoregressive rollout (test_l2_full of exp_ns.py)",
+  "weights": "last epoch (no validation split, so no epoch selection)",
+  "paper_reference": {
+    "model": "Transolver",
+    "test_rel_l2": 0.09,
+    "source": "Wu et al. 2024 (ICML), Transolver"
+  },
+  "copy_last_frame_baseline": {
+    "test_rel_l2": 0.7480663061141968,
+    "per_step_rel_l2": [
+      0.20368528366088867,
+      0.35925671458244324,
+      0.49631401896476746,
+      0.611550509929657,
+      0.7057594060897827,
+      0.7806549072265625,
+      0.8367262482643127,
+      0.8718180060386658,
+      0.8789294362068176,
+      0.8554375171661377
+    ]
+  },
+  "model": "wno",
+  "arch": {
+    "hidden_channels": 60,
+    "n_layers": 4,
+    "level": 3,
+    "wavelet": "db4"
+  },
+  "cycle_momentum": false,
+  "optimizer": "adamw",
+  "n_params": 11312957,
+  "vs_transolver_params": 0.007178925887178611,
+  "test_rel_l2": {
+    "mean": 0.3198372721672058,
+    "median": 0.30502328276634216,
+    "p90": 0.4536446839570999,
+    "max": 0.6158589124679565
+  },
+  "per_step_rel_l2": [
+    0.061383433640003204,
+    0.09288519620895386,
+    0.1312652826309204,
+    0.17704907059669495,
+    0.22554631531238556,
+    0.2740723490715027,
+    0.3208191692829132,
+    0.3720036745071411,
+    0.4191862940788269,
+    0.4664820432662964
+  ],
+  "final_epoch_test_rel_l2_logged": 0.3199004322290421,
+  "contour_sample": 178,
+  "timing": {
+    "first_epoch_s": 57.05152683518827,
+    "steady_epoch_s": 65.81368211098015,
+    "total_h": 8.72665114944335
+  },
+  "checkpoint_sha256": "08c98c462722dc63cdd489fe830503a59c81ec6619ee426abb43b59fea4c3562",
+  "provenance": {
+    "git_commit": "839d69e52ce2c1f3b9561b59c4a5a279cb9d5136",
+    "git_dirty": false,
+    "jax": "0.6.2",
+    "flax": "0.10.7",
+    "optax": "0.2.8",
+    "device": "TFRT_CPU_0",
+    "created_utc": "2026-10-14T06:01:47+00:00",
+    "converted_from": "wno_ns/wno_ns_params.bytes (weights after the last epoch, 499) and its loss_curve.csv",
+    "source_sha256": "08c98c462722dc63cdd489fe830503a59c81ec6619ee426abb43b59fea4c3562",
+    "trained_by": "an earlier standalone training script, same recipe, data, model and seed",
+    "trained": "2026-10-12",
+    "data_file": "NavierStokes_V1e-5_N1200_T20.mat",
+    "training_device": "NVIDIA RTX PRO 6000 Blackwell Max-Q (cuda:0); the device field above is where this conversion ran",
+    "note": "Trained before this benchmark's train.py existed, with the same recipe, data, model and seed (plain optax AdamW).",
+    "timing_note": "Trained on one RTX PRO 6000 Blackwell GPU shared with up to five other jobs; per-epoch times are not a controlled measure."
+  }
+}

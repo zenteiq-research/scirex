@@ -1,0 +1,8 @@
+# Code owners for ScireX
+#
+# Public ownership is organization-level, not individual employees (see GOVERNANCE.md).
+# Reviews are requested from the project mailbox. For the automatic review request to
+# work, that address must be a verified email of a GitHub account with write access to
+# the repository (for example a shared project account).
+
+* research@zenteiq.ai

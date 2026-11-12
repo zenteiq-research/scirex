@@ -1,0 +1,19 @@
+{#
+  SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+  SPDX-License-Identifier: LGPL-3.0-only
+
+  Open Graph tags, so that a link shared in Slack, Teams or LinkedIn shows a title card.
+#}
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {% set title = (page.meta.title if page and page.meta and page.meta.title else page.title) if page and page.title else config.site_name %}
+  {% set description = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+  <meta property="og:title" content="{{ title }}">
+  {% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
+  {% if page and page.canonical_url %}<meta property="og:url" content="{{ page.canonical_url }}">{% endif %}
+  <meta property="og:image" content="{{ config.site_url | default('', true) | trim('/') }}/assets/brand/scirex-logo.png">
+  <meta name="twitter:card" content="summary">
+{% endblock %}

@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security problems here. Follow SECURITY.md instead.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproducible example
+      description: Code or commands that show the problem, and the full traceback.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: info
+    attributes:
+      label: ScireX environment report
+      description: Paste the output of `python -m scirex.info`. It lists the ScireX, Python, JAX, jaxlib, Flax and Optax versions, the operating system and the JAX devices.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Anything else about your environment
+      description: Optional. Driver or CUDA version, container image, or other details the report does not show.
+  - type: textarea
+    id: context
+    attributes:
+      label: Scientific context
+      description: Optional. The equation, dataset or paper involved.

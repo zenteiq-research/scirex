@@ -1,0 +1,8 @@
+ZenteiQ and ScireX logos and brand assets
+
+The files in this folder (the Sx app icon used as the site logo and favicon, and the ScireX wordmark) are ZenteiQ trademark
+artwork, taken from the ZenteiQ brand guidelines (BrandColor_2026). They are not licensed
+under CC BY 4.0 or LGPL-3.0-only, and they are not part of the software or documentation
+licences. Use them only as the brand guidelines allow: do not recolour, redraw, outline,
+distort or add effects to them. Replace these files with the approved vector artwork
+from the ZenteiQ brand team before the public release.

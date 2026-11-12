@@ -1,0 +1,287 @@
+{
+  "problem": "cavity",
+  "label": "Zenteiq",
+  "reference": {
+    "citation": "Costa Rocha, P.A.; Johnston, S.J.; Oliveira Santos, V.; Aliabadi, A.A.; Th\u00e9, J.V.G.; Gharabaghi, B. Deep Neural Network Modeling for CFD Simulations: Benchmarking the Fourier Neural Operator on the Lid-Driven Cavity Case. Appl. Sci. 2023, 13, 3165.",
+    "doi": "https://doi.org/10.3390/app13053165"
+  },
+  "dataset": {
+    "train_cases": [
+      "01k",
+      "02k",
+      "04k",
+      "06k",
+      "14k",
+      "16k",
+      "18k",
+      "20k"
+    ],
+    "test_case": "10k",
+    "grid": "128x128 cells",
+    "frames": "steps 0 to 100 (first 10 s, every 0.1 s)",
+    "fields": [
+      "p",
+      "Ux",
+      "Uy"
+    ]
+  },
+  "protocol": {
+    "optimizer": "adam",
+    "lr": 0.001,
+    "lr_factor": 0.5,
+    "lr_patience": 10,
+    "early_stop_patience": 50,
+    "epochs": 300,
+    "batch_size": 8,
+    "mc_weight": 0.1,
+    "val_frac": 0.1,
+    "seed": 0
+  },
+  "metric": "RMSE in m/s pooled over p, Ux, Uy on the test case",
+  "rollout_horizon": 10,
+  "baseline_copy_last_frame": {
+    "n_in": 3,
+    "single_step": {
+      "rmse": 0.004399502649903297,
+      "rmse_vel": 0.005358050111681223
+    },
+    "rollout": {
+      "horizon": 10,
+      "n_sequences": 89,
+      "rmse": 0.014957890845835209,
+      "rmse_vel": 0.01820794679224491,
+      "per_step_rmse": [
+        0.004616444930434227,
+        0.007952508516609669,
+        0.010530093684792519,
+        0.012629969045519829,
+        0.014396529644727707,
+        0.015910806134343147,
+        0.017224570736289024,
+        0.018374739214777946,
+        0.01938956044614315,
+        0.020291656255722046
+      ]
+    }
+  },
+  "model": "transolver",
+  "runs": {
+    "transolver_3to1": {
+      "model": "transolver",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "n_hidden": 128,
+        "n_layers": 3,
+        "slice_num": 64
+      },
+      "n_params": 1093851,
+      "epochs_run": 300,
+      "best_epoch": 300,
+      "best_val_loss": 0.0006484147219453007,
+      "single_step": {
+        "rmse": 0.0020387391559779644,
+        "rmse_vel": 0.0024828410241752863,
+        "per_channel": {
+          "p": 0.00037466437788680196,
+          "Ux": 0.002723763231188059,
+          "Uy": 0.0022158764768391848
+        },
+        "mean_abs_div": 0.08170594274997711
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.007664950098842382,
+        "rmse_vel": 0.0093052564188838,
+        "per_step_rmse": [
+          0.0021016148384660482,
+          0.003359039081260562,
+          0.004514768719673157,
+          0.005550629459321499,
+          0.006542635150253773,
+          0.007531287148594856,
+          0.00854713935405016,
+          0.009606077335774899,
+          0.010714421980082989,
+          0.011872919276356697
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 43.09021529601887,
+        "mean_epoch_s": 17.518884134957766,
+        "total_min": 88.02060952747318
+      },
+      "checkpoint_sha256": "d77db2eb22bc94904210d52af87ee5dbc3942fd2a6a8458f389dd4bcf1131db6"
+    },
+    "best_transolver_3to1": {
+      "model": "transolver",
+      "n_in": 3,
+      "n_out": 1,
+      "arch": {
+        "n_hidden": 128,
+        "n_layers": 3,
+        "slice_num": 16
+      },
+      "n_params": 1091403,
+      "epochs_run": 300,
+      "best_epoch": 299,
+      "best_val_loss": 0.0007015750597929582,
+      "single_step": {
+        "rmse": 0.0021822918206453323,
+        "rmse_vel": 0.0026522104162722826,
+        "per_channel": {
+          "p": 0.00046770652988925576,
+          "Ux": 0.002857217099517584,
+          "Uy": 0.002429968910291791
+        },
+        "mean_abs_div": 0.08336632698774338
+      },
+      "rollout": {
+        "horizon": 10,
+        "n_sequences": 89,
+        "rmse": 0.00839189812541008,
+        "rmse_vel": 0.010155086405575275,
+        "per_step_rmse": [
+          0.0022534942254424095,
+          0.0037764187436550856,
+          0.005212047602981329,
+          0.006458599120378494,
+          0.007627778686583042,
+          0.008716419339179993,
+          0.009719081223011017,
+          0.010613401420414448,
+          0.011389481835067272,
+          0.012043115682899952
+        ]
+      },
+      "paper": {},
+      "timing": {
+        "first_epoch_s": 41.87197190395091,
+        "mean_epoch_s": 12.864374128005617,
+        "total_min": 64.80533060296051
+      },
+      "checkpoint_sha256": "af98046e9cfcd4259b0e1b4b5f5363263f74c81755fdd75d7576f1efc8f8089f"
+    }
+  },
+  "search": {
+    "transolver": {
+      "paper_table1_50_epochs": null,
+      "paper_table2_300_epochs": null,
+      "n_beating_paper_table2": null,
+      "configs": [
+        {
+          "name": "search_transolver_L3_h128_s16",
+          "arch": {
+            "n_hidden": 128,
+            "n_layers": 3,
+            "slice_num": 16
+          },
+          "n_params": 1091403,
+          "best_val_loss": 0.001516323268879205,
+          "rmse": 0.003658943809568882
+        },
+        {
+          "name": "search_transolver_L1_h64_s32",
+          "arch": {
+            "n_hidden": 64,
+            "n_layers": 1,
+            "slice_num": 32
+          },
+          "n_params": 105195,
+          "best_val_loss": 0.0016461739083752035,
+          "rmse": 0.0035610913764685392
+        },
+        {
+          "name": "search_transolver_L1_h64_s64",
+          "arch": {
+            "n_hidden": 64,
+            "n_layers": 1,
+            "slice_num": 64
+          },
+          "n_params": 105483,
+          "best_val_loss": 0.0017732499865815044,
+          "rmse": 0.0034696110524237156
+        },
+        {
+          "name": "search_transolver_L2_h128_s16",
+          "arch": {
+            "n_hidden": 128,
+            "n_layers": 2,
+            "slice_num": 16
+          },
+          "n_params": 745139,
+          "best_val_loss": 0.0018073316023219377,
+          "rmse": 0.0037643196992576122
+        },
+        {
+          "name": "search_transolver_L2_h64_s16",
+          "arch": {
+            "n_hidden": 64,
+            "n_layers": 2,
+            "slice_num": 16
+          },
+          "n_params": 191987,
+          "best_val_loss": 0.0018765697255730628,
+          "rmse": 0.003486433532088995
+        },
+        {
+          "name": "search_transolver_L3_h64_s16",
+          "arch": {
+            "n_hidden": 64,
+            "n_layers": 3,
+            "slice_num": 16
+          },
+          "n_params": 278923,
+          "best_val_loss": 0.0019463579810690135,
+          "rmse": 0.0038402487989515066
+        },
+        {
+          "name": "search_transolver_L1_h128_s16",
+          "arch": {
+            "n_hidden": 128,
+            "n_layers": 1,
+            "slice_num": 16
+          },
+          "n_params": 398875,
+          "best_val_loss": 0.0019641340244561435,
+          "rmse": 0.0045471517369151115
+        },
+        {
+          "name": "search_transolver_L2_h32_s32",
+          "arch": {
+            "n_hidden": 32,
+            "n_layers": 2,
+            "slice_num": 32
+          },
+          "n_params": 51027,
+          "best_val_loss": 0.002416367828845978,
+          "rmse": 0.004309110343456268
+        },
+        {
+          "name": "search_transolver_L1_h32_s32",
+          "arch": {
+            "n_hidden": 32,
+            "n_layers": 1,
+            "slice_num": 32
+          },
+          "n_params": 29019,
+          "best_val_loss": 0.0026569255162030457,
+          "rmse": 0.004132815171033144
+        },
+        {
+          "name": "search_transolver_L1_h32_s16",
+          "arch": {
+            "n_hidden": 32,
+            "n_layers": 1,
+            "slice_num": 16
+          },
+          "n_params": 28939,
+          "best_val_loss": 0.0026874543516896667,
+          "rmse": 0.00410616397857666
+        }
+      ]
+    }
+  }
+}

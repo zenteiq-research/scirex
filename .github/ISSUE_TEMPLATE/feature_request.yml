@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+name: Feature or new example
+description: Propose an enhancement, model, problem or example.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Scientific or technical motivation
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Mathematical background, API sketch, references to papers.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched the existing issues and the documentation; this does not exist yet.
+          required: true
+        - label: I have read CONTRIBUTING.md, including the licensing of contributions.
+          required: true

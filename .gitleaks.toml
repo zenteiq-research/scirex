@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 ZenteiQ AiTech Innovations Pvt. Ltd.
+# SPDX-License-Identifier: LGPL-3.0-only
+
+title = "ScireX gitleaks config"
+
+[extend]
+useDefault = true
+
+# Mock Zenodo file names in the web_utils unit tests are matched by the
+# generic-api-key rule. Both conditions must hold, so the allow-list cannot
+# hide a real secret elsewhere in this file or in any other file.
+[[allowlists]]
+description = "Mock dataset archive names in test_web_utils.py"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''tests/_internal/test_web_utils\.py''']
+regexes = ['''darcy_\d+\.tgz''']
