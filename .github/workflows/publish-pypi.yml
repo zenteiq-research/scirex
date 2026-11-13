@@ -4,16 +4,21 @@
 name: Publish to PyPI
 
 # Publish a version tag to PyPI through a trusted publisher (OpenID Connect, no API
-# token). It runs only when started by hand on a tag, in the public repository:
+# token). Start it by hand from the default branch and name the tag to publish:
 #
-#   gh workflow run publish-pypi.yml -R zenteiq-research/scirex --ref v1.0.0
+#   gh workflow run publish-pypi.yml -R zenteiq-research/scirex --ref main -f tag=v1.0.0
 #
-# Pushing a tag uploads nothing, so a tag can reach the public repository before release
-# day. The PyPI trusted publisher names this repository and this workflow file
-# (publish-pypi.yml), with no environment. Only accounts with write access to the
-# repository can start it.
+# (Actions → Publish to PyPI → Run workflow → branch main, tag v1.0.0.) Every job checks
+# out and builds the tag, not the branch. Pushing a tag uploads nothing. The PyPI trusted
+# publisher names this repository and this workflow file (publish-pypi.yml), with no
+# environment. Only accounts with write access to the repository can start it.
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag to publish, e.g. v1.0.0"
+        required: true
+        type: string
 
 concurrency:
   group: publish-pypi
@@ -25,13 +30,14 @@ permissions:
 jobs:
   build:
     name: Build and check the distributions
-    # Only in the public repository, and only on a version tag (never a branch).
-    if: github.repository == 'zenteiq-research/scirex' && startsWith(github.ref, 'refs/tags/v')
+    # Only in the public repository, and only for a version tag.
+    if: github.repository == 'zenteiq-research/scirex' && startsWith(inputs.tag, 'v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
+          ref: refs/tags/${{ inputs.tag }}
           persist-credentials: false
           fetch-depth: 0 # the committer check reads the whole history
 
@@ -40,8 +46,11 @@ jobs:
           python-version: "3.10"
 
       - name: Verify the tag matches the version in pyproject.toml
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          git rev-parse --verify --quiet "refs/tags/$TAG" > /dev/null || { echo "$TAG is not a tag"; exit 1; }
+          TAG_VERSION="${TAG#v}"
           FILE_VERSION=$(python -c "
           import re, pathlib
           m = re.search(r'^version\s*=\s*\"(.*?)\"', pathlib.Path('pyproject.toml').read_text(), re.M)
@@ -88,6 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
+          ref: refs/tags/${{ inputs.tag }}
           persist-credentials: false
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -135,7 +145,9 @@ jobs:
           name: dist
           path: dist/
 
-      - uses: pypa/gh-action-pypi-publish@106e0b0b7c337fa67ed433972f777c6357f78598 # v1.13.0
+      # Pinned to the COMMIT of v1.13.0 (ed0c539...). The earlier pin, 106e0b0b..., was the
+      # annotated tag object, for which the action has no image ("manifest unknown").
+      - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           packages-dir: dist/
           attestations: true
