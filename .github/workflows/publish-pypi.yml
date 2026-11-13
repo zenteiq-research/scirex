@@ -132,9 +132,10 @@ jobs:
     needs: [build, smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Deliberately without a GitHub environment, because the PyPI trusted publisher for 1.0.0
-    # names none. A "pypi" environment with required reviewers can be added for later
-    # releases, in this job and in the trusted publisher together.
+    # The "pypi" environment has required reviewers: the upload waits until one approves it.
+    # The PyPI trusted publisher names this environment, so a run without it is refused.
+    environment: pypi
+
     permissions:
       contents: read
       id-token: write # OpenID Connect token for the trusted publisher
