@@ -145,9 +145,11 @@ jobs:
           name: dist
           path: dist/
 
-      # Pinned to the COMMIT of v1.13.0 (ed0c539...). The earlier pin, 106e0b0b..., was the
-      # annotated tag object, for which the action has no image ("manifest unknown").
-      - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+      # Pinned to the COMMIT of v1.14.3, not its annotated tag object: the action pulls an
+      # image named after the pinned ref, and only commits have one. v1.14.3 ships twine 7.0.0
+      # and packaging 26.2, which accept the Metadata-Version 2.5 that current hatchling writes
+      # (v1.13.0's twine 6.1.0 rejects it).
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           packages-dir: dist/
           attestations: true
