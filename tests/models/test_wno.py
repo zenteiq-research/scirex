@@ -34,6 +34,7 @@ import pytest
 from scirex.layers.blocks.wno_block import mish
 from scirex.losses.data_losses import LpLoss
 from scirex.models.wno import WNO
+from tests import tolerances
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -398,6 +399,51 @@ def test_wno_padding_symmetric(rng):
     )
     out = model.apply(model.init(rng, x), x)
     assert out.shape == (2, 32, 32, 1)
+
+
+def _pad_apply_crop_reference(module, x, pad_amounts):
+    """Explicit symmetric pad -> WNO blocks -> crop of the original region."""
+    h = module.fc0(x)
+    spatial_shape = h.shape[1:-1]
+    h = jnp.pad(h, [(0, 0)] + [(p, p) for p in pad_amounts] + [(0, 0)])
+    for block in module.wno_blocks:
+        h = block(h)
+    crop = tuple(slice(p, p + n) for p, n in zip(pad_amounts, spatial_shape))
+    h = h[(slice(None), *crop, slice(None))]
+    return module.fc2(module.projection_activation(module.fc1(h)))
+
+
+@pytest.mark.parametrize(
+    "shape, size, padding, pad_amounts",
+    [
+        ((2, 32, 1), 32, 8, [8]),
+        ((2, 16, 32, 1), (16, 32), [3, 0.25], [3, 8]),
+        ((2, 31, 1), 31, 0.1, [3]),
+    ],
+)
+def test_wno_padding_symmetric_crops_original_region(
+    rng, shape, size, padding, pad_amounts
+):
+    """Symmetric padding must crop [pad, pad + n) so outputs align with inputs."""
+    x = jax.random.normal(rng, shape)
+    model = WNO(
+        in_channels=1,
+        hidden_channels=8,
+        n_layers=2,
+        level=2,
+        size=size,
+        out_channels=1,
+        wavelet="haar",
+        use_grid=False,
+        padding=padding,
+        padding_side="symmetric",
+        compute_dtype=jnp.float32,
+    )
+    params = model.init(rng, x)
+    out = model.apply(params, x)
+    expected = model.apply(params, x, pad_amounts, method=_pad_apply_crop_reference)
+    assert out.shape == expected.shape
+    assert jnp.allclose(out, expected, atol=tolerances.atol(1e-5))
 
 
 def test_wno_padding_as_per_dim_list(rng):

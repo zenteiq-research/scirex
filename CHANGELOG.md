@@ -10,6 +10,14 @@ All notable changes to **ScireX** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `WNO` with `padding_side="symmetric"` now crops the padded output back to the original
+  region (`[pad, pad + n)` on each axis) instead of `[0, n)`, which shifted the output by
+  `pad` points and dropped the last `pad` points. `padding_side="end"` is unchanged.
+
 ## [1.0.0] - 2026-11-12
 
 First release of ScireX: a JAX/Flax library of neural operators for scientific machine

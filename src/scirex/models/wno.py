@@ -238,9 +238,12 @@ class WNO(BaseModel, name="WNO"):
             x = block(x)
 
         if pad_amounts is not None:
+            # Symmetric padding added `pad` points before the data, so the
+            # original region starts at `pad`; with "end" padding it starts at 0.
             slices = [slice(None)]
-            for dim_size in spatial_shape:
-                slices.append(slice(0, dim_size))
+            for dim_size, pad in zip(spatial_shape, pad_amounts):
+                start = pad if self.padding_side == "symmetric" else 0
+                slices.append(slice(start, start + dim_size))
             slices.append(slice(None))
             x = x[tuple(slices)]
 
