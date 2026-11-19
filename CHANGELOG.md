@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `load_surface_mesh` now returns the points and quad cells of `quadpress_smpl.vtk` in the
+  file's own point order. It used `vtkDataSetSurfaceFilter`, which drops unused points and
+  renumbers the rest, so the per-point surface pressure was drawn on the wrong vertices by
+  `plot_car_surface_pressure`, the ShapeNetCar export of `scripts/benchmarks/make_figures.py`
+  and the ShapeNetCar `infer.py` figure and VTK export. The drag coefficient is unchanged
+  ([#7](https://github.com/zenteiq-research/scirex/issues/7)).
 - `WNO` with `padding_side="symmetric"` now crops the padded output back to the original
   region (`[pad, pad + n)` on each axis) instead of `[0, n)`, which shifted the output by
   `pad` points and dropped the last `pad` points. `padding_side="end"` is unchanged.

@@ -228,25 +228,31 @@ def load_surface_mesh(quadpress_vtk_path: str | Path) -> tuple[np.ndarray, np.nd
     `plot_car_surface_pressure` to render the true CFD mesh instead of a
     2D projection/triangulation of the point cloud.
 
+    Points and cells are read from the unstructured grid itself, not from
+    ``vtkDataSetSurfaceFilter``: the filter drops unused points and
+    renumbers the rest (3682 -> 3586 points on the first test car), which
+    would no longer match the per-point arrays the callers pass, as these
+    follow the file's own point order.
+
     Returns
     -------
     points : array, shape (N_points, 3)
+        every point of ``quadpress_vtk_path``, in file order.
     quads : array, shape (N_cells, 4), dtype int64
+        the file's quad cells, as indices into ``points``.
     """
     import vtk
     from vtk.util.numpy_support import vtk_to_numpy
 
     ug = _load_unstructured_grid_data(quadpress_vtk_path)
-    poly_data, _ = _unstructured_grid_data_to_poly_data(ug)
-    points = vtk_to_numpy(poly_data.GetPoints().GetData())
+    points = vtk_to_numpy(ug.GetPoints().GetData())
 
-    cells = poly_data.GetPolys()
     quads = []
-    cells.InitTraversal()
-    cell = vtk.vtkIdList()
-    while cells.GetNextCell(cell):
-        if cell.GetNumberOfIds() == 4:
-            quads.append([cell.GetId(i) for i in range(4)])
+    ids = vtk.vtkIdList()
+    for cell_id in range(ug.GetNumberOfCells()):
+        ug.GetCellPoints(cell_id, ids)
+        if ids.GetNumberOfIds() == 4:
+            quads.append([ids.GetId(i) for i in range(4)])
     return points, np.asarray(quads, dtype=np.int64)
 
 

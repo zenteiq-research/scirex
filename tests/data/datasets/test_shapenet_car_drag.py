@@ -26,7 +26,10 @@ from vtk.util.numpy_support import numpy_to_vtk  # noqa: E402
 from scirex.data.datasets.shapenet_car_drag import (  # noqa: E402
     DEFAULT_AIR_DENSITY,
     DEFAULT_FREESTREAM_VELOCITY,
+    _load_unstructured_grid_data,
+    _unstructured_grid_data_to_poly_data,
     compute_drag_coefficient,
+    load_surface_mesh,
     mean_relative_drag_error,
     spearman_drag_correlation,
 )
@@ -103,3 +106,64 @@ def test_spearman_drag_correlation_perfect_rank_agreement() -> None:
 def test_spearman_drag_correlation_perfect_rank_disagreement() -> None:
     rho = spearman_drag_correlation([1, 2, 3, 4], [40, 30, 20, 10])
     assert rho == pytest.approx(-1.0)
+
+
+def _write_two_quads_with_unused_point(path: Path) -> np.ndarray:
+    """Two unit quads side by side, written with an unused first point and
+    cells that list their points out of file order -- the two features of the
+    real ``quadpress_smpl.vtk`` files that make ``vtkDataSetSurfaceFilter``
+    renumber the points. Returns the file's point coordinates."""
+    pts = np.array(
+        [
+            [9, 9, 9],  # unused by any cell
+            [2, 1, 0],
+            [0, 0, 0],
+            [1, 1, 0],
+            [2, 0, 0],
+            [0, 1, 0],
+            [1, 0, 0],
+        ],
+        dtype=np.float64,
+    )
+    vtk_points = vtk.vtkPoints()
+    for p in pts:
+        vtk_points.InsertNextPoint(*p)
+    ug = vtk.vtkUnstructuredGrid()
+    ug.SetPoints(vtk_points)
+    for ids in ([2, 6, 3, 5], [6, 4, 1, 3]):
+        quad = vtk.vtkQuad()
+        for i, pid in enumerate(ids):
+            quad.GetPointIds().SetId(i, pid)
+        ug.InsertNextCell(quad.GetCellType(), quad.GetPointIds())
+
+    writer = vtk.vtkUnstructuredGridWriter()
+    writer.SetFileName(str(path))
+    writer.SetInputData(ug)
+    writer.Write()
+    return pts
+
+
+def test_load_surface_mesh_keeps_file_point_order(tmp_path: Path) -> None:
+    path = tmp_path / "quadpress_smpl.vtk"
+    file_points = _write_two_quads_with_unused_point(path)
+
+    # The fixture must reproduce the renumbering, or the test proves nothing.
+    poly, _ = _unstructured_grid_data_to_poly_data(_load_unstructured_grid_data(path))
+    assert poly.GetNumberOfPoints() < len(file_points)
+
+    points, quads = load_surface_mesh(path)
+    np.testing.assert_array_equal(points, file_points)
+    np.testing.assert_array_equal(quads, [[2, 6, 3, 5], [6, 4, 1, 3]])
+
+
+def test_load_surface_mesh_values_stay_on_their_vertices(tmp_path: Path) -> None:
+    """A per-point field in file order, indexed through the returned quads,
+    must give the field evaluated at each quad's own corners -- what
+    ``plot_car_surface_pressure`` relies on."""
+    path = tmp_path / "quadpress_smpl.vtk"
+    file_points = _write_two_quads_with_unused_point(path)
+    field = file_points @ np.array([1.0, 10.0, 100.0])
+
+    points, quads = load_surface_mesh(path)
+    expected = points[quads] @ np.array([1.0, 10.0, 100.0])
+    np.testing.assert_allclose(field[quads], expected)
