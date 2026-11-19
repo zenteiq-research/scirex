@@ -60,8 +60,8 @@ from scripts.benchmarks.airfrans._config import (  # noqa: E402
     DEFAULT_CKPT_ROOT,
     DEFAULT_DATA_DIR,
     DEFAULT_OUT_DIR,
-    GINO_ARGS,
     GINO_CONTOUR_CASE,
+    GINO_EVAL_ARGS,
     MODEL_LABELS,
     PAPER_REFERENCE,
     PROTOCOL,
@@ -291,6 +291,30 @@ def timing(history: list[dict]) -> dict:
     )
 
 
+def gino_eval_argv(
+    data_dir: Path, cache_dir: Path, out_dir: Path, gino_dir: Path
+) -> list[str]:
+    """Arguments of ``_gino.main`` that score the GINO checkpoint in ``gino_dir``.
+
+    Uses ``GINO_EVAL_ARGS``: the published model, scored on the exact wall nodes.
+    """
+    return [
+        *GINO_EVAL_ARGS,
+        "--data-dir",
+        str(data_dir),
+        "--cache-dir",
+        str(cache_dir),
+        "--output-dir",
+        str(out_dir),
+        "--eval-only",
+        str(gino_dir / "params_final.msgpack"),
+        "--history",
+        str(gino_dir / "loss_curve.csv"),
+        "--contour-case",
+        GINO_CONTOUR_CASE,
+    ]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -389,21 +413,12 @@ def main() -> None:
         pass
     elif (gino_dir / "params_final.msgpack").exists():
         _gino.main(
-            [
-                *GINO_ARGS,
-                "--data-dir",
-                str(args.data_dir),
-                "--cache-dir",
-                str(args.cache_dir / "gino"),
-                "--output-dir",
-                str(args.out_dir / "airfrans_gino"),
-                "--eval-only",
-                str(gino_dir / "params_final.msgpack"),
-                "--history",
-                str(gino_dir / "loss_curve.csv"),
-                "--contour-case",
-                GINO_CONTOUR_CASE,
-            ]
+            gino_eval_argv(
+                args.data_dir,
+                args.cache_dir / "gino",
+                args.out_dir / "airfrans_gino",
+                gino_dir,
+            )
         )
         done += 1
     else:

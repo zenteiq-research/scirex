@@ -36,8 +36,9 @@ the nearest airfoil-surface point, matching
 `shapenet_car.py`'s `_get_sdf` direction convention) is
 computed via a `NearestNeighbors` query against the sample's own
 `_aerofoil.vtp` points, and doubles as the `surf` boundary mask
-(`dist < 1e-5`, i.e. mesh nodes that coincide exactly with an airfoil
-surface point -- OpenFOAM's wall-conforming mesh generation guarantees this).
+(`dist < 1e-5`). Wall cells are about 2e-6 thick, so this mask covers the
+airfoil surface points and the first off-wall mesh layers, about five times
+the wall nodes; the wall nodes alone are the points with `U[:, 0] == 0`.
 
 **Inlet velocity (u_inf_x, u_inf_y)**: the AirfRANS paper's own input feature
 vector is R^7 -- spatial coordinates, INLET VELOCITY, the SDF distance, and
@@ -194,7 +195,8 @@ def _read_raw_sample(data_dir: str | Path, case_id: str) -> dict:
     dists = dists.reshape(-1)
     nearest = surf_pos[indices[:, 0]]
     dirs = (pos - nearest) / (dists[:, None] + 1e-8)
-    surf = dists < 1e-5  # wall-conforming mesh: exact coincidence at the surface
+    # The wall points and the first off-wall layers (wall cells are ~2e-6 thick).
+    surf = dists < 1e-5
 
     u_inf = _read_freestream_velocity(data_dir, case_id)
     u_inf_bcast = np.broadcast_to(u_inf, (pos.shape[0], 2))

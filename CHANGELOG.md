@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `scripts/benchmarks/airfrans/infer.py` now scores GINO on the exact wall nodes, as the
+  published metrics were computed. It passed the training-only flag `--loader-surf-mask`,
+  so the evaluation used the loader's surface mask, which also covers the first off-wall
+  layers, and did not reproduce the published GINO metrics. The evaluation arguments are now
+  `_config.GINO_EVAL_ARGS`; training is unchanged. The `surf` description of
+  `load_airfrans` is corrected accordingly
+  ([#8](https://github.com/zenteiq-research/scirex/issues/8)).
 - `WNO` with `padding_side="symmetric"` now crops the padded output back to the original
   region (`[pad, pad + n)` on each axis) instead of `[0, n)`, which shifted the output by
   `pad` points and dropped the last `pad` points. `padding_side="end"` is unchanged.

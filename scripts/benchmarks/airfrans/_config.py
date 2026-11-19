@@ -146,6 +146,9 @@ GINO_ARGS: list[str] = [
     "--latent-res", "128", "64",
     "--loader-surf-mask",
 ]  # fmt: skip
+#: The same settings for evaluation. ``--loader-surf-mask`` only applies to training:
+#: the evaluation scores on the exact wall nodes, as the published metrics were.
+GINO_EVAL_ARGS: list[str] = [arg for arg in GINO_ARGS if arg != "--loader-surf-mask"]
 #: The test case drawn in GINO's ``contour.png``.
 GINO_CONTOUR_CASE = "airFoil2D_SST_59.56_-4.362_1.048_5.664_1.0_18.157"
 

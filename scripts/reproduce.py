@@ -243,9 +243,9 @@ def run_airfrans_gino(
 ) -> dict[Cell, float]:
     """Score the published AirfRANS GINO with the arguments of its original evaluation.
 
-    ``airfrans/infer.py`` evaluates GINO with ``GINO_ARGS``, which includes
-    ``--loader-surf-mask``. The published run did not use that flag, so ``_gino.py`` is
-    called directly with the published settings.
+    The published run was scored on the exact wall nodes, without the training flag
+    ``--loader-surf-mask``; ``_gino.py`` is called directly with the same settings as
+    ``_config.GINO_EVAL_ARGS``, which ``airfrans/infer.py`` uses.
     """
     ck = ckpt_dir(a, cells[0])
     if not (ck / "params_final.msgpack").exists():

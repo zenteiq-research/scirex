@@ -138,3 +138,28 @@ def test_published_args_are_the_reported_model():
 
     published = vars(_args(*GINO_ARGS))
     assert published == vars(_args(*REPORTED, "--epochs", "500", "--loader-surf-mask"))
+
+
+def test_eval_args_are_the_training_args_on_the_exact_wall():
+    """GINO_EVAL_ARGS is the published model without the training-only wall mask."""
+    from scripts.benchmarks.airfrans._config import GINO_ARGS, GINO_EVAL_ARGS
+
+    train, evaluate = vars(_args(*GINO_ARGS)), vars(_args(*GINO_EVAL_ARGS))
+    assert train["loader_surf_mask"] and not evaluate["loader_surf_mask"]
+    del train["loader_surf_mask"], evaluate["loader_surf_mask"]
+    assert evaluate == train
+
+
+def test_infer_scores_gino_on_the_exact_wall(tmp_path):
+    """infer.py passes _gino.main arguments that score the checkpoint on the exact
+    wall nodes, as the published metrics were computed."""
+    from scripts.benchmarks.airfrans.infer import gino_eval_argv
+
+    gino_dir = tmp_path / "gino"
+    argv = gino_eval_argv(
+        tmp_path / "data", tmp_path / "cache", tmp_path / "out", gino_dir
+    )
+    args = _parser().parse_args(argv)
+    assert not args.loader_surf_mask
+    assert args.eval_only == str(gino_dir / "params_final.msgpack")
+    assert args.data_dir == str(tmp_path / "data")
