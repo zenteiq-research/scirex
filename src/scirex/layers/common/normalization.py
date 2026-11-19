@@ -132,8 +132,13 @@ class BatchNorm(nn.Module):
     form of normalization and is effective when batch statistics are a good
     approximation of the overall data distribution.
 
-    For dimensions > 3, the layer automatically flattens spatial dimensions
-    and uses BatchNorm, as high-dimensional batch norm requires flattening.
+    Inputs are channels-first, `(batch, num_features, *spatial)`. By default the
+    statistics, scale and bias are indexed by the last axis (the last spatial
+    axis, or the flattened spatial axis for n_dim > 3), as in ScireX 1.0.0, so
+    they are tied to that axis's size; with `channel_axis=True` they are per
+    channel. For dimensions > 3, the layer automatically flattens spatial
+    dimensions and uses BatchNorm, as high-dimensional batch norm requires
+    flattening.
 
     Parameters
     ----------
@@ -157,11 +162,16 @@ class BatchNorm(nn.Module):
             If True, apply learnable bias. Default is True.
         - use_scale : bool, optional
             If True, apply learnable scale. Default is True.
+    channel_axis : bool, optional
+        Normalise over the channel axis (axis 1): statistics, scale and bias
+        have shape (num_features,) and apply at any resolution. Default is
+        False, which keeps the last-axis behaviour described above.
     """
 
     n_dim: int
     num_features: int
     kwargs: Any = None
+    channel_axis: bool = False
 
     def setup(self) -> None:
         if self.n_dim > 3:
@@ -192,7 +202,13 @@ class BatchNorm(nn.Module):
         # in 4+D, we flatten and use batchnorm on flattened spatial dim
         if self.n_dim >= 4:
             x = x.reshape(size[0], size[1], -1)
-        x = self.norm(x, use_running_average=use_running_average)
+        if self.channel_axis:
+            # flax BatchNorm treats the last axis as features; move channels there
+            x = jnp.moveaxis(x, 1, -1)
+            x = self.norm(x, use_running_average=use_running_average)
+            x = jnp.moveaxis(x, -1, 1)
+        else:
+            x = self.norm(x, use_running_average=use_running_average)
 
         # if flattening occurred, unflatten
         if self.n_dim >= 4:

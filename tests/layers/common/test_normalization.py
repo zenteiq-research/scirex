@@ -97,6 +97,45 @@ def test_BatchNorm_high_dim_shape(backend: str) -> None:
         assert out.shape == x.shape
 
 
+@pytest.mark.parametrize("n_dim", [1, 2, 3, 4])
+def test_BatchNorm_channel_axis(n_dim: int) -> None:
+    """channel_axis=True: statistics, scale and bias are per channel (axis 1).
+
+    C = 3 differs from all spatial sizes; each channel gets its own offset and
+    spread, which per-channel batch norm must remove.
+    """
+    spatial = {1: (20,), 2: (6, 10), 3: (4, 5, 6), 4: (2, 3, 4, 5)}[n_dim]
+    key = jax.random.PRNGKey(4)
+    x = jax.random.normal(key, (4, 3, *spatial), dtype=jnp.float32)
+    bshape = (1, 3) + (1,) * n_dim
+    x = x * jnp.array([1.0, 5.0, 0.2]).reshape(bshape)
+    x = x + jnp.array([-3.0, 0.0, 7.0]).reshape(bshape)
+    mod = BatchNorm(n_dim=n_dim, num_features=3, channel_axis=True)
+    variables = mod.init(key, x)
+    for leaf in jax.tree_util.tree_leaves(variables):
+        assert leaf.shape == (3,)
+    out, _ = mod.apply(variables, x, mutable=["batch_stats"])
+    axes = (0, *range(2, x.ndim))
+    tol = tolerances.atol(1e-5)
+    assert jnp.allclose(jnp.mean(out, axis=axes), 0.0, rtol=0, atol=tol)
+    # float32 cancellation in the variance of the offset-7, spread-0.2 channel
+    var_tol = tolerances.atol(5e-3)
+    assert jnp.allclose(jnp.var(out, axis=axes), 1.0, rtol=0, atol=var_tol)
+    # same variables at another resolution
+    y = jax.random.normal(key, (4, 3, *spatial[:-1], spatial[-1] + 3))
+    out_y, _ = mod.apply(variables, y, mutable=["batch_stats"])
+    assert out_y.shape == y.shape
+
+
+def test_BatchNorm_default_keeps_last_axis_layout() -> None:
+    """The default keeps the 1.0.0 variables: one per last-axis entry."""
+    key = jax.random.PRNGKey(5)
+    x = jax.random.normal(key, (2, 3, 6, 10), dtype=jnp.float32)
+    variables = BatchNorm(n_dim=2, num_features=3).init(key, x)
+    for leaf in jax.tree_util.tree_leaves(variables):
+        assert leaf.shape == (10,)
+
+
 # ---------------------------------------------------------------------------
 # AdaIN
 # ---------------------------------------------------------------------------

@@ -197,7 +197,9 @@ def test_fno_superresolution(resolution_scaling_factor: list[float]) -> None:
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-@pytest.mark.parametrize("norm", [None, "group_norm", "instance_norm"])
+@pytest.mark.parametrize(
+    "norm", [None, "group_norm", "instance_norm", "channel_group_norm"]
+)
 @pytest.mark.parametrize("complex_data", [False, True])
 def test_fno_norm(norm: str | None, complex_data: bool, backend: str) -> None:
     """Each normalization variant produces the correct output shape."""
@@ -213,6 +215,27 @@ def test_fno_norm(norm: str | None, complex_data: bool, backend: str) -> None:
         )
         out = _forward(model, _input(2, complex_data=complex_data))
         assert list(out.shape) == [BATCH, 1, S, S]
+
+
+@pytest.mark.parametrize("norm", ["channel_group_norm", "channel_batch_norm"])
+def test_fno_channel_norm_applies_at_another_resolution(norm: str) -> None:
+    """Parameters initialised on one grid apply on a finer one."""
+    model = FNO(
+        in_channels=3,
+        out_channels=1,
+        hidden_channels=16,
+        n_modes=(MODES, MODES),
+        n_layers=N_LAYERS,
+        norm=norm,
+    )
+    variables = model.init(jax.random.PRNGKey(1), _input(2))
+    x = jax.random.normal(jax.random.PRNGKey(2), (BATCH, 3, S, 2 * S))
+    if "batch_stats" in variables:
+        out, _ = model.apply(variables, x, mutable=["batch_stats"])
+    else:
+        out = model.apply(variables, x)
+    assert out.shape == (BATCH, 1, S, 2 * S)
+    assert bool(jnp.all(jnp.isfinite(out)))
 
 
 @pytest.mark.parametrize(
