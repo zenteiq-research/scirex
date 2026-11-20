@@ -121,7 +121,11 @@ Saved runs/fno  (test rel. L2 0.63%)
 ```
 
 The `train` column is the relative L2 error on the training batches, the
-`test` column on the held-out samples, both in the units of your data.
+`test` column on the held-out samples, both in the units of your data. With
+several output channels the error is pooled over them by default, so the
+channel with the largest values dominates it; if your channels differ in
+scale (a pressure in Pa next to a velocity), use `--rel-l2 per-channel` to
+measure each channel against its own norm and average them.
 
 Check the setup first on a CPU in under a minute: `--smoke` trains a tiny
 model for 2 epochs on the first 32 samples. Its error stays near 100%; it
@@ -138,6 +142,7 @@ only shows that the data, the model and the saving work.
 | `--batch-size` | `16` | Samples per step, summed over all devices |
 | `--lr` | `1e-3` | Peak learning rate (AdamW with cosine decay) |
 | `--test-fraction` | `0.2` | Share of samples held out when there is no `x_test` |
+| `--rel-l2` | `pooled` | `pooled`: one relative L2 over all output channels; `per-channel`: per channel, then averaged, so each counts equally whatever its scale |
 | `--seed` | `0` | Seed of the split, the initialisation and the batch order |
 | `--out` | `runs/<model>` | Where the run is saved |
 | `--set KEY=VALUE` | – | Any model argument, e.g. `--set n_modes=24,24` or `--set slice_num=64` (see [Models and Losses](models_and_losses.md#key-settings)); repeat for several |

@@ -555,13 +555,26 @@ class Pipeline:
         return cls(cfg["model"], kw, info, xn, Normalizer(**cfg["y_norm"]), lo, hi)
 
 
-def rel_l2(pred, true):
-    """Relative L2 error per sample."""
+def rel_l2(pred, true, per_channel=False):
+    """Relative L2 error per sample.
+
+    Pooled by default: one norm over all points and channels, as in 1.0.0. With
+    ``per_channel=True`` each channel is measured against its own norm and the
+    errors are averaged, so a channel of small values (a velocity next to a
+    pressure in Pa) counts as much as a large one. A channel that is zero in a
+    sample is then measured against the sample's RMS channel norm instead.
+    """
     import jax.numpy as jnp
 
-    b = pred.shape[0]
-    diff = jnp.linalg.norm((pred - true).reshape(b, -1), axis=1)
-    return diff / jnp.maximum(jnp.linalg.norm(true.reshape(b, -1), axis=1), 1e-12)
+    b, c = pred.shape[0], pred.shape[-1]
+    if not per_channel:
+        diff = jnp.linalg.norm((pred - true).reshape(b, -1), axis=1)
+        return diff / jnp.maximum(jnp.linalg.norm(true.reshape(b, -1), axis=1), 1e-12)
+    diff = jnp.linalg.norm((pred - true).reshape(b, -1, c), axis=1)
+    norm = jnp.linalg.norm(true.reshape(b, -1, c), axis=1)
+    rms = jnp.linalg.norm(norm, axis=1, keepdims=True) / jnp.sqrt(c)
+    norm = jnp.where(norm > 1e-6 * rms, norm, rms)
+    return jnp.mean(diff / jnp.maximum(norm, 1e-12), axis=-1)
 
 
 # ---------------------------------------------------------------------------
@@ -664,8 +677,10 @@ def train_run(args) -> dict:
     params = jax.device_put(params, replicate)
     opt_state = jax.device_put(tx.init(params), replicate)
 
+    per_channel = args.rel_l2 == "per-channel"
+
     def loss_fn(p, b, y):  # relative L2 in the units of the data
-        return jnp.mean(rel_l2(pipe.y_norm.decode(pipe.apply(p, b)), y))
+        return jnp.mean(rel_l2(pipe.y_norm.decode(pipe.apply(p, b)), y, per_channel))
 
     @jax.jit
     def train_step(p, s, b, y):
@@ -692,7 +707,7 @@ def train_run(args) -> dict:
 
     def test_errors(p):
         return np.asarray(
-            rel_l2(jnp.asarray(predict(p, v_in, n_test)), jnp.asarray(v_y))
+            rel_l2(jnp.asarray(predict(p, v_in, n_test)), jnp.asarray(v_y), per_channel)
         )
 
     every = max(1, epochs // 20)
@@ -736,6 +751,7 @@ def train_run(args) -> dict:
         n_params=int(n_params),
         n_train=n_train,
         n_test=n_test,
+        rel_l2=args.rel_l2,
         test_rel_l2_mean=float(errors.mean()),
         test_rel_l2_median=float(np.median(errors)),
         test_rel_l2_p90=float(np.percentile(errors, 90)),
@@ -816,6 +832,13 @@ def parse_args(argv=None) -> argparse.Namespace:
         type=float,
         default=0.2,
         help="share held out when there is no x_test",
+    )
+    p.add_argument(
+        "--rel-l2",
+        choices=("pooled", "per-channel"),
+        default="pooled",
+        help="relative L2 over all channels at once, or per channel and averaged "
+        "(default: pooled)",
     )
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", help="run directory (default: runs/<model>)")

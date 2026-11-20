@@ -15,6 +15,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests import tolerances
+
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
@@ -133,6 +135,52 @@ def test_split_is_seeded_and_disjoint(data):
     assert not np.isin(b["y"][:, 5, 5, 0], a["y"][:, 5, 5, 0]).any()
 
 
+def test_rel_l2_is_pooled_by_default():
+    rng = np.random.default_rng(0)
+    y = rng.standard_normal((2, 8, 8, 2)).astype(np.float32)
+    pred = y + 0.1 * rng.standard_normal(y.shape).astype(np.float32)
+    pooled = np.linalg.norm((pred - y).reshape(2, -1), axis=1) / np.linalg.norm(
+        y.reshape(2, -1), axis=1
+    )
+    np.testing.assert_allclose(
+        np.asarray(tr.rel_l2(pred, y)), pooled, rtol=tolerances.rtol(1e-6)
+    )
+    assert tr.parse_args(["--model", "fno", "--data", "d.npz"]).rel_l2 == "pooled"
+
+
+def test_rel_l2_per_channel_counts_each_channel_equally():
+    rng = np.random.default_rng(0)
+    y = rng.standard_normal((2, 8, 8, 2)).astype(np.float32)
+    y[..., 1] = 1000 * y[..., 1] + 300
+    pred = y.copy()
+    pred[..., 0] = 0  # the small channel is entirely wrong
+    np.testing.assert_allclose(
+        np.asarray(tr.rel_l2(pred, y, per_channel=True)),
+        0.5,
+        rtol=tolerances.rtol(1e-6),
+    )
+    assert np.all(np.asarray(tr.rel_l2(pred, y)) < 0.01)  # pooled hides it
+    one = y[..., :1]  # one channel: both definitions agree
+    np.testing.assert_allclose(
+        np.asarray(tr.rel_l2(0.1 * one, one, per_channel=True)),
+        np.asarray(tr.rel_l2(0.1 * one, one)),
+        rtol=tolerances.rtol(1e-6),
+    )
+    mesh = y.reshape(2, 64, 2)  # (samples, points, channels)
+    np.testing.assert_allclose(
+        np.asarray(tr.rel_l2(pred.reshape(2, 64, 2), mesh, per_channel=True)),
+        0.5,
+        rtol=tolerances.rtol(1e-6),
+    )
+
+
+def test_rel_l2_per_channel_stays_finite_for_a_zero_channel():
+    y = np.ones((2, 8, 8, 2), np.float32)
+    y[..., 0] = 0
+    err = np.asarray(tr.rel_l2(y + 0.01, y, per_channel=True))
+    assert np.all(err < 0.1)
+
+
 def test_set_values_are_parsed():
     assert tr.parse_set(
         ["n_modes=24,24", "slice_num=64", "lr=3e-4", "flag=true", "wavelet=db6"]
@@ -201,6 +249,53 @@ def test_train_then_predict(tmp_path, data, model, kind):
     err = np.linalg.norm(
         (y_pred - test["y"]).reshape(len(y_pred), -1), axis=1
     ) / np.linalg.norm(test["y"].reshape(len(y_pred), -1), axis=1)
+    assert err.mean() == pytest.approx(metrics["test_rel_l2_mean"], rel=1e-4)
+
+
+def test_per_channel_run_reports_per_channel(tmp_path, data):
+    with np.load(data["grid"]) as f:
+        d = {k: f[k] for k in f.files}
+    d["y"] = np.concatenate([d["y"], 1000 * d["y"] + 300], -1)  # two scales
+    two = tmp_path / "two.npz"
+    np.savez(two, **d)
+    out = tmp_path / "run"
+    res = run(
+        "train.py",
+        "--model",
+        "fno",
+        "--data",
+        str(two),
+        "--smoke",
+        "--rel-l2",
+        "per-channel",
+        "--out",
+        str(out),
+    )
+    assert res.returncode == 0, res.stderr[-3000:]
+    metrics = json.loads((out / "metrics.json").read_text())
+    assert metrics["rel_l2"] == "per-channel"
+
+    cfg = json.loads((out / "config.json").read_text())
+    _, test = tr.split(
+        tr.load_data(two, smoke=True),
+        cfg["options"]["test_fraction"],
+        cfg["options"]["seed"],
+    )
+    test_file = tmp_path / "test.npz"
+    np.savez(test_file, **{k: v for k, v in test.items() if v is not None})
+    pred = run(
+        "predict.py",
+        "--run",
+        str(out),
+        "--data",
+        str(test_file),
+        "--out",
+        str(tmp_path / "p.npz"),
+    )
+    assert pred.returncode == 0, pred.stderr[-3000:]
+    assert "(per-channel)" in pred.stdout
+    y_pred = np.load(tmp_path / "p.npz")["y_pred"]
+    err = np.asarray(tr.rel_l2(y_pred, test["y"].astype(np.float32), per_channel=True))
     assert err.mean() == pytest.approx(metrics["test_rel_l2_mean"], rel=1e-4)
 
 
