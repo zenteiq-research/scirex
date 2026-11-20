@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `FNOBlocks` / `FNO` `norm` and `GINO` `fno_norm` accept `"channel_group_norm"` and
+  `"channel_batch_norm"`, and `BatchNorm` takes `channel_axis=True`. These normalise
+  over the channel axis: scale and bias (and, for batch norm, the statistics) have
+  shape `(out_channels,)` and apply at any resolution. `"group_norm"` and
+  `"batch_norm"` are unchanged: they index these by the last spatial axis, so their
+  parameters are tied to its size, and released models and checkpoints load as before.
+
 ### Fixed
 
 - `WNO` with `padding_side="symmetric"` now crops the padded output back to the original
