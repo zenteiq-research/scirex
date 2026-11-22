@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a low error. The choice is saved in `metrics.json` and `config.json`, and
   `scripts/predict.py` reports with the run's choice unless `--rel-l2` is given.
 - `FNOBlocks` / `FNO` `norm` and `GINO` `fno_norm` accept `"channel_group_norm"` and
-  `"channel_batch_norm"`, and `BatchNorm` takes `channel_axis=True`. These normalise
+  `"channel_batch_norm"`, backed by a new channels-first `GroupNorm` layer and
+  `BatchNorm(channel_axis=True)` in `scirex.layers.common.normalization`. These normalise
   over the channel axis: scale and bias (and, for batch norm, the statistics) have
   shape `(out_channels,)` and apply at any resolution. `"group_norm"` and
   `"batch_norm"` are unchanged: they index these by the last spatial axis, so their

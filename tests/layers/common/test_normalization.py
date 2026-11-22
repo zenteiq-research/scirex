@@ -19,7 +19,12 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from scirex.layers.common.normalization import AdaIN, BatchNorm, InstanceNorm
+from scirex.layers.common.normalization import (
+    AdaIN,
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
+)
 from tests import tolerances
 
 
@@ -134,6 +139,29 @@ def test_BatchNorm_default_keeps_last_axis_layout() -> None:
     variables = BatchNorm(n_dim=2, num_features=3).init(key, x)
     for leaf in jax.tree_util.tree_leaves(variables):
         assert leaf.shape == (10,)
+
+
+@pytest.mark.parametrize("n_dim", [1, 2, 3])
+@pytest.mark.parametrize("num_groups", [1, 2])
+def test_GroupNorm_channels_first(n_dim: int, num_groups: int) -> None:
+    """Per-sample, per-group statistics over channels and spatial axes; scale and
+    bias of shape (C,), the same variables at any resolution."""
+    spatial = {1: (20,), 2: (6, 10), 3: (4, 5, 6)}[n_dim]
+    key = jax.random.PRNGKey(6)
+    x = jax.random.normal(key, (2, 4, *spatial), dtype=jnp.float32)
+    x = x * 3.0 + 2.0
+    mod = GroupNorm(num_groups=num_groups)
+    variables = mod.init(key, x)
+    for leaf in jax.tree_util.tree_leaves(variables):
+        assert leaf.shape == (4,)
+    out = mod.apply(variables, x)
+    g = x.reshape(2, num_groups, -1)
+    mean = jnp.mean(g, axis=-1, keepdims=True)
+    var = jnp.var(g, axis=-1, keepdims=True)
+    ref = ((g - mean) / jnp.sqrt(var + 1e-6)).reshape(x.shape)
+    assert jnp.allclose(out, ref, rtol=0, atol=tolerances.atol(1e-5))
+    y = jax.random.normal(key, (2, 4, *spatial[:-1], spatial[-1] + 3))
+    assert mod.apply(variables, y).shape == y.shape
 
 
 # ---------------------------------------------------------------------------

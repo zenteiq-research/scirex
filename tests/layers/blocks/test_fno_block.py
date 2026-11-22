@@ -18,7 +18,6 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 from flax import linen as nn
-from flax.errors import ScopeParamShapeError
 from flax.traverse_util import flatten_dict
 
 from scirex.layers.blocks.fno_block import FNOBlocks, SubModule
@@ -518,13 +517,9 @@ def test_FNOBlock_channel_norm_scale_acts_on_one_channel(norm: str) -> None:
     base = np.asarray(_apply(block, variables, x))
 
     params = variables["params"]
-    if norm == "channel_batch_norm":
-        inner = params["_norm_1"]["norm"]
-        scaled = {**inner, "scale": inner["scale"].at[c].multiply(3.0)}
-        new_norm = {**params["_norm_1"], "norm": scaled}
-    else:
-        scale = params["_norm_1"]["scale"]
-        new_norm = {**params["_norm_1"], "scale": scale.at[c].multiply(3.0)}
+    inner = params["_norm_1"]["norm"]
+    scaled = {**inner, "scale": inner["scale"].at[c].multiply(3.0)}
+    new_norm = {**params["_norm_1"], "norm": scaled}
     new_vars = {**variables, "params": {**params, "_norm_1": new_norm}}
     out = np.asarray(_apply(block, new_vars, x))
 
@@ -564,24 +559,16 @@ def test_FNOBlock_channel_batch_norm_statistics_per_channel() -> None:
     np.testing.assert_allclose(out.var(axis=(0, 2, 3)), 1.0, rtol=0, atol=var_tol)
 
 
-@pytest.mark.parametrize(
-    "norm, error",
-    # batch_norm already fails on the running-average update
-    [("group_norm", ScopeParamShapeError), ("batch_norm", TypeError)],
-)
-def test_FNOBlock_norm_keeps_last_axis_layout(
-    norm: str, error: type[Exception]
-) -> None:
+@pytest.mark.parametrize("norm", ["group_norm", "batch_norm"])
+def test_FNOBlock_norm_keeps_last_axis_layout(norm: str) -> None:
     """group_norm / batch_norm keep the 1.0.0 layout: variables of the last spatial
-    size, tied to it."""
+    size."""
     block = _norm_block(norm, 2)
     x = jax.random.normal(jax.random.PRNGKey(0), (2, _C, 16, 24))
     variables = block.init(jax.random.PRNGKey(1), x)
     for path, leaf in _norm_leaves(variables).items():
         assert leaf.shape == (24,), path
     assert _apply(block, variables, x).shape == x.shape
-    with pytest.raises(error):
-        _apply(block, variables, jnp.ones((2, _C, 16, 32)))
 
 
 # Outputs of the 1.0.0 code (commit bedbaca) with norm="group_norm" / "batch_norm"

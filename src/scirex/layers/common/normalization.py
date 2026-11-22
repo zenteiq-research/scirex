@@ -5,8 +5,8 @@
 # THIRD_PARTY_NOTICES.md.
 
 """
-Dimension-agnostic normalization layers (AdaIN, instance norm, batch norm) for neural
-operators.
+Dimension-agnostic normalization layers (AdaIN, instance norm, group norm, batch norm)
+for neural operators.
 """
 
 import logging
@@ -122,6 +122,46 @@ class InstanceNorm(nn.Module):
         x = (x - mean) / jnp.sqrt(var + eps)
         assert x.shape == size
         return x
+
+
+class GroupNorm(nn.Module):
+    """Channels-first group normalization for neural operators.
+
+    Inputs are `(batch, channels, *spatial)`. Each sample is normalised over its
+    spatial axes and the channels of each group; scale and bias have shape
+    `(channels,)`, so the layer applies at any resolution. `flax.linen.GroupNorm`
+    expects features last and, given a channels-first input, groups and scales
+    along the last spatial axis instead.
+
+    Parameters
+    ----------
+    num_groups : int, optional
+        Number of channel groups; must divide the channel count. Default is 1.
+    epsilon : float, optional
+        Small value added to the variance for numerical stability. Default is
+        1e-6, as in `flax.linen.GroupNorm`.
+    use_bias : bool, optional
+        If True, learn a per-channel bias. Default is True.
+    use_scale : bool, optional
+        If True, learn a per-channel scale. Default is True.
+    """
+
+    num_groups: int = 1
+    epsilon: float = 1e-6
+    use_bias: bool = True
+    use_scale: bool = True
+
+    @nn.compact
+    def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
+        """Apply group normalization to a channels-first tensor."""
+        norm = nn.GroupNorm(
+            num_groups=self.num_groups,
+            epsilon=self.epsilon,
+            use_bias=self.use_bias,
+            use_scale=self.use_scale,
+            name="norm",
+        )
+        return jnp.moveaxis(norm(jnp.moveaxis(x, 1, -1)), -1, 1)
 
 
 class BatchNorm(nn.Module):

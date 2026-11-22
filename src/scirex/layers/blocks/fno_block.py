@@ -13,7 +13,7 @@ import jax.numpy as jnp
 from ..._internal.scaling import validate_scaling_factor
 from ..common.channel_mlp import ChannelMLP
 from ..common.complex import ComplexValued, cgelu, ctanh
-from ..common.normalization import AdaIN, BatchNorm, InstanceNorm
+from ..common.normalization import AdaIN, BatchNorm, GroupNorm, InstanceNorm
 from ..common.skip_connections import skip_connection
 from .spectral_convolution import SpectralConv
 
@@ -266,9 +266,13 @@ class FNOBlocks(nn.Module):
             norm = None
         elif self.norm == "instance_norm":
             norm = [InstanceNorm() for _ in range(self.n_layers * self.n_norms)]
-        elif self.norm in ("group_norm", "channel_group_norm"):
+        elif self.norm == "group_norm":
             norm = [
                 nn.GroupNorm(num_groups=1) for _ in range(self.n_layers * self.n_norms)
+            ]
+        elif self.norm == "channel_group_norm":
+            norm = [
+                GroupNorm(num_groups=1) for _ in range(self.n_layers * self.n_norms)
             ]
         elif self.norm in ("batch_norm", "channel_batch_norm"):
             norm = [
@@ -356,9 +360,6 @@ class FNOBlocks(nn.Module):
             else:
                 emb = ada_in_embeddings[norm_idx]
             return norm_layer(x, emb)
-        if self.norm == "channel_group_norm":
-            # flax norms treat the last axis as features; x is (B, C, *spatial)
-            return jnp.moveaxis(norm_layer(jnp.moveaxis(x, 1, -1)), -1, 1)
         return norm_layer(x)
 
     def forward_with_postactivation(
