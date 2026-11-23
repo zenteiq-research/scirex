@@ -84,9 +84,13 @@ class FNO(BaseModel, name="FNO"):
         Default: "grid"
     non_linearity : nn.Module, optional
         Non-Linear activation function module to use. Default: nn.gelu
-    norm : Literal["ada_in", "group_norm", "instance_norm"], optional
+    norm : Literal["ada_in", "group_norm", "instance_norm", "batch_norm",
+            "channel_group_norm", "channel_batch_norm"], optional
         Normalization layer to use. Options: "ada_in", "group_norm",
-        "instance_norm", None. Default: None
+        "instance_norm", "batch_norm", "channel_group_norm",
+        "channel_batch_norm", None. Default: None. The "channel_" variants
+        normalise per channel and apply at any resolution; see
+        `scirex.layers.FNOBlocks`.
     complex_data : bool, optional
         Whether the data is complex-valued. If True, initializes
         complex-valued modules. Default: False

@@ -13,7 +13,7 @@ import jax.numpy as jnp
 from ..._internal.scaling import validate_scaling_factor
 from ..common.channel_mlp import ChannelMLP
 from ..common.complex import ComplexValued, cgelu, ctanh
-from ..common.normalization import AdaIN, BatchNorm, InstanceNorm
+from ..common.normalization import AdaIN, BatchNorm, GroupNorm, InstanceNorm
 from ..common.skip_connections import skip_connection
 from .spectral_convolution import SpectralConv
 
@@ -54,9 +54,15 @@ class FNOBlocks(nn.Module):
     stabilizer : Literal["tanh"], optional
         Stabilizing module to use between certain layers. Options: "tanh", None,
         by default None
-    norm : Literal["ada_in", "group_norm", "instance_norm", "batch_norm"], optional
+    norm : Literal["ada_in", "group_norm", "instance_norm", "batch_norm",
+            "channel_group_norm", "channel_batch_norm"], optional
         Normalization layer to use. Options: "ada_in", "group_norm", "instance_norm",
-        "batch_norm", None, by default None
+        "batch_norm", "channel_group_norm", "channel_batch_norm", None, by default
+        None. "group_norm" and "batch_norm" index their scale and bias (and, for
+        batch_norm, their statistics) by the last spatial axis, so their
+        parameters are tied to that axis's size. "channel_group_norm" and
+        "channel_batch_norm" index them by channel (axis 1), so the parameters
+        have shape (out_channels,) and apply at any resolution.
     ada_in_features : int, optional
         Number of features for adaptive instance norm above, by default None
     preactivation : bool, optional
@@ -264,9 +270,17 @@ class FNOBlocks(nn.Module):
             norm = [
                 nn.GroupNorm(num_groups=1) for _ in range(self.n_layers * self.n_norms)
             ]
-        elif self.norm == "batch_norm":
+        elif self.norm == "channel_group_norm":
             norm = [
-                BatchNorm(n_dim=self.n_dim, num_features=self.out_channels)
+                GroupNorm(num_groups=1) for _ in range(self.n_layers * self.n_norms)
+            ]
+        elif self.norm in ("batch_norm", "channel_batch_norm"):
+            norm = [
+                BatchNorm(
+                    n_dim=self.n_dim,
+                    num_features=self.out_channels,
+                    channel_axis=self.norm == "channel_batch_norm",
+                )
                 for _ in range(self.n_layers * self.n_norms)
             ]
         elif self.norm == "ada_in":
@@ -277,7 +291,8 @@ class FNOBlocks(nn.Module):
         else:
             raise ValueError(
                 f"Got norm={self.norm} but expected None or one of "
-                "[instance_norm, group_norm, batch_norm, ada_in]"
+                "[instance_norm, group_norm, batch_norm, ada_in, "
+                "channel_group_norm, channel_batch_norm]"
             )
 
         # Wrap in ComplexValued while the list is still a local variable, then

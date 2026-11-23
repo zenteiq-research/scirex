@@ -5,8 +5,8 @@
 # THIRD_PARTY_NOTICES.md.
 
 """
-Dimension-agnostic normalization layers (AdaIN, instance norm, batch norm) for neural
-operators.
+Dimension-agnostic normalization layers (AdaIN, instance norm, group norm, batch norm)
+for neural operators.
 """
 
 import logging
@@ -124,6 +124,46 @@ class InstanceNorm(nn.Module):
         return x
 
 
+class GroupNorm(nn.Module):
+    """Channels-first group normalization for neural operators.
+
+    Inputs are `(batch, channels, *spatial)`. Each sample is normalised over its
+    spatial axes and the channels of each group; scale and bias have shape
+    `(channels,)`, so the layer applies at any resolution. `flax.linen.GroupNorm`
+    expects features last and, given a channels-first input, groups and scales
+    along the last spatial axis instead.
+
+    Parameters
+    ----------
+    num_groups : int, optional
+        Number of channel groups; must divide the channel count. Default is 1.
+    epsilon : float, optional
+        Small value added to the variance for numerical stability. Default is
+        1e-6, as in `flax.linen.GroupNorm`.
+    use_bias : bool, optional
+        If True, learn a per-channel bias. Default is True.
+    use_scale : bool, optional
+        If True, learn a per-channel scale. Default is True.
+    """
+
+    num_groups: int = 1
+    epsilon: float = 1e-6
+    use_bias: bool = True
+    use_scale: bool = True
+
+    @nn.compact
+    def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
+        """Apply group normalization to a channels-first tensor."""
+        norm = nn.GroupNorm(
+            num_groups=self.num_groups,
+            epsilon=self.epsilon,
+            use_bias=self.use_bias,
+            use_scale=self.use_scale,
+            name="norm",
+        )
+        return jnp.moveaxis(norm(jnp.moveaxis(x, 1, -1)), -1, 1)
+
+
 class BatchNorm(nn.Module):
     """Dimension-agnostic batch normalization layer for neural operators.
 
@@ -132,8 +172,13 @@ class BatchNorm(nn.Module):
     form of normalization and is effective when batch statistics are a good
     approximation of the overall data distribution.
 
-    For dimensions > 3, the layer automatically flattens spatial dimensions
-    and uses BatchNorm, as high-dimensional batch norm requires flattening.
+    Inputs are channels-first, `(batch, num_features, *spatial)`. By default the
+    statistics, scale and bias are indexed by the last axis (the last spatial
+    axis, or the flattened spatial axis for n_dim > 3), as in ScireX 1.0.0, so
+    they are tied to that axis's size; with `channel_axis=True` they are per
+    channel. For dimensions > 3, the layer automatically flattens spatial
+    dimensions and uses BatchNorm, as high-dimensional batch norm requires
+    flattening.
 
     Parameters
     ----------
@@ -157,11 +202,16 @@ class BatchNorm(nn.Module):
             If True, apply learnable bias. Default is True.
         - use_scale : bool, optional
             If True, apply learnable scale. Default is True.
+    channel_axis : bool, optional
+        Normalise over the channel axis (axis 1): statistics, scale and bias
+        have shape (num_features,) and apply at any resolution. Default is
+        False, which keeps the last-axis behaviour described above.
     """
 
     n_dim: int
     num_features: int
     kwargs: Any = None
+    channel_axis: bool = False
 
     def setup(self) -> None:
         if self.n_dim > 3:
@@ -192,7 +242,13 @@ class BatchNorm(nn.Module):
         # in 4+D, we flatten and use batchnorm on flattened spatial dim
         if self.n_dim >= 4:
             x = x.reshape(size[0], size[1], -1)
-        x = self.norm(x, use_running_average=use_running_average)
+        if self.channel_axis:
+            # flax BatchNorm treats the last axis as features; move channels there
+            x = jnp.moveaxis(x, 1, -1)
+            x = self.norm(x, use_running_average=use_running_average)
+            x = jnp.moveaxis(x, -1, 1)
+        else:
+            x = self.norm(x, use_running_average=use_running_average)
 
         # if flattening occurred, unflatten
         if self.n_dim >= 4:
