@@ -260,7 +260,7 @@ WORKFLOW = (ROOT / ".github" / "workflows" / "publish-pypi.yml").read_text()
     [
         "workflow_dispatch:",
         "github.repository == 'zenteiq-research/scirex'",
-        "startsWith(github.ref, 'refs/tags/v')",
+        "startsWith(inputs.tag, 'v')",
         "pypa/gh-action-pypi-publish@",
         "attestations: true",
         "id-token: write",
@@ -277,7 +277,15 @@ def test_pushing_a_tag_publishes_nothing() -> None:
     # Publishing is started by hand on release day; a pushed tag must not upload.
     top, _, _ = WORKFLOW.partition("\njobs:\n")
     assert "push:" not in top and "tags:" not in top
-    assert "environment:" not in WORKFLOW  # the trusted publisher names no environment
+
+
+def test_only_the_publish_job_uses_the_pypi_environment() -> None:
+    # The "pypi" environment has required reviewers, and the PyPI trusted publisher
+    # names it, so the upload job must run in it and no other job needs it.
+    _, _, jobs = WORKFLOW.partition("\njobs:\n")
+    _, _, publish = jobs.partition("\n  publish:\n")
+    assert "environment: pypi" in publish
+    assert jobs.count("environment:") == 1
 
 
 def test_publish_workflow_is_pinned_and_has_no_token() -> None:

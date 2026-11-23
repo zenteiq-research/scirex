@@ -10,8 +10,9 @@ name: Publish to PyPI
 #
 # (Actions → Publish to PyPI → Run workflow → branch main, tag v1.0.0.) Every job checks
 # out and builds the tag, not the branch. Pushing a tag uploads nothing. The PyPI trusted
-# publisher names this repository and this workflow file (publish-pypi.yml), with no
-# environment. Only accounts with write access to the repository can start it.
+# publisher names this repository, this workflow file (publish-pypi.yml) and the "pypi"
+# environment, whose required reviewers must approve the upload. Only accounts with write
+# access to the repository can start it.
 on:
   workflow_dispatch:
     inputs:
