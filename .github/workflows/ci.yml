@@ -158,15 +158,18 @@ jobs:
                 -filter-mode=added -fail-level=error
 
   test:
-    name: Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    name: Tests (${{ matrix.os }}, Python ${{ matrix.python-version }}, ${{ matrix.suite }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
         # Platform tiers (DEC-4): Ubuntu 22.04 and 24.04 LTS on x86_64, macOS on Apple Silicon.
         os: [ubuntu-22.04, ubuntu-24.04, macos-15]
         python-version: ["3.10", "3.11", "3.12"]
+        # The two suites run as separate parallel jobs, each in its own pytest process:
+        # "package" is tests/ (mirrors src/scirex/), "scripts" is scripts/tests/.
+        suite: [package, scripts]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -194,20 +197,21 @@ jobs:
       # GPU-marked tests are deselected: CI runners have no NVIDIA GPU.
       # Package tests live in tests/, mirroring src/scirex/.
       - name: Run tests
+        if: matrix.suite == 'package'
         run: |
           pytest tests/ -v --tb=short -m "not gpu" \
             --cov=scirex --cov-report=term-missing --cov-report=xml
 
       # Tests for the training and benchmark scripts. They run in their own
-      # pytest process because many scripts call
+      # job (so in their own pytest process) because many scripts call
       # jax.config.update("jax_enable_x64", False) at import time, which
       # would turn off float64 for the scirex tests if collected together.
       - name: Run script tests
-        if: ${{ !cancelled() }}
+        if: matrix.suite == 'scripts'
         run: pytest scripts/tests/ -v --tb=short -m "not gpu"
 
       - name: Upload coverage report
-        if: always()
+        if: always() && matrix.suite == 'package'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-py${{ matrix.python-version }}-${{ matrix.os }}
@@ -220,7 +224,7 @@ jobs:
   test-resolution:
     name: Tests (${{ matrix.resolution }}, Python 3.12)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
