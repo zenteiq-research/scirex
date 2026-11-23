@@ -317,8 +317,15 @@ def test_extract_refuses_without_data_filter(
 # ---------------------------------------------------------------------------
 
 
-def test_download_from_url_streams_and_extracts_tar(tmp_path, monkeypatch) -> None:
-    """A mocked streaming download writes the file, checks size, and extracts a tar."""
+def test_download_from_url_streams_and_extracts_tar(
+    tmp_path, monkeypatch, tar_impl
+) -> None:
+    """A mocked streaming download writes the file, checks size, and extracts a tar.
+
+    Skipped on interpreters without ``tarfile.data_filter`` (for example the
+    CPython 3.10.11 that macOS arm64 runners provide), where extraction is refused;
+    ``test_extract_refuses_without_data_filter`` covers that refusal.
+    """
     import io
     import tarfile
 
